@@ -76,33 +76,12 @@ while True:  # Event Loop
         pwd = subprocess.Popen(['echo', sudo_password], cwd=radar_path, stdout=subprocess.PIPE)
         pwd.wait()
         print('sudopass: ', pwd.stdout.read())
-        x = ['sudo', '-S'] + [radar_cmd]
-        print(x)
+
         cmd = subprocess.Popen(['sudo', '-S'] + [radar_cmd], cwd=radar_path, stdin=pwd.stdout,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         cmd.wait()
         print('setup_radar error return code: ', cmd.stderr.read())
-        # print('setup_radar21: ', cmd.stdout.read())
 
-        # cmd = subprocess.Popen(['export', export_cmd], cwd=cwd, stdin=cmd.stdout, shell=True,  # env=env,
-        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # cmd.wait()
-        # print('export: ', cmd.stdout.read())
-
-        # cmd = subprocess.Popen(fpga_cmd, cwd=cwd, shell=True,  # env=env,
-        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
-
-        # cmd = subprocess.Popen(dca, cwd=cwd, shell=True, text=True, stdin=subprocess.PIPE,  # env=env,
-        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
-        # cmd.wait()
-        # cmd.stdin.write("fpga cf.json")
-        # cmd.wait()
-        # cmd.stdin.write("record cf.json")
-        # cmd.wait()
-        # cmd.stdin.write("start_record cf.json")
-        # cmd.wait()
-        x = ['sudo', '-S'] + fpga_cmd
-        print(x)
         cmd = subprocess.Popen(fpga_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  # text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         cmd.wait()
@@ -117,7 +96,10 @@ while True:  # Event Loop
         print('record error2: ', cmd.stderr.read())
         print('record stdout: ', cmd.stdout.read())
 
-        window['setup_text'].update('Radar is ready to go!')
+        if cmd.returncode == 0:
+            window['setup_text'].update('Radar is ready to go!')
+        else:
+            window['setup_text'].update('Radar is failed to setup (Restart needed)!')
 
     elif event == '1. Start Recording':
         window['md_text'].update('                               ')
@@ -137,6 +119,7 @@ while True:  # Event Loop
         window['rd_text'].update('')
         window['stop_text'].update('Done!                        ')
         window['start_text'].update('                               ')
+        window['setup_text'].update('                               ')
 
         cmd.stdin.write("stop_record cf.json")
         cmd.wait()
