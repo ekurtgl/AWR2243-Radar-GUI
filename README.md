@@ -2,4 +2,4 @@
 
 `mmwaveconfig.txt` and `cf.json` needs to be placed where they are needed.
 
-'cwd' and 'radar_path' variables in `main.py` need to be adjusted according to your path.
+'cwd', 'sudo_password' and 'radar_path' variables in `main.py` need to be adjusted according to your path.
