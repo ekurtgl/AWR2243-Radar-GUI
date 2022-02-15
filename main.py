@@ -82,16 +82,19 @@ while True:  # Event Loop
         cmd.wait()
         print('setup_radar error return code: ', cmd.stderr.read())
 
-        cmd = subprocess.Popen(fpga_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  # text=True,
+        cmd = subprocess.Popen(fpga_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         cmd.wait()
         print('fpga error return code: ', cmd.returncode)
         print('fpga error2: ', cmd.stderr.read())
         print('fpga stdout: ', cmd.stdout.read())
 
-        cmd = subprocess.Popen(record_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  # text=True,
+        cmd = subprocess.Popen(record_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         cmd.wait()
+        # cmd.stdin.write("record cf.json")
+        # cmd.wait()
+
         print('record error return code: ', cmd.returncode)
         print('record error2: ', cmd.stderr.read())
         print('record stdout: ', cmd.stdout.read())
@@ -106,10 +109,14 @@ while True:  # Event Loop
         window['rd_text'].update('')
         window['stop_text'].update('                             ')
         window['start_text'].update('Go!                            ')
+        window['setup_text'].update('                               ')
 
         cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         cmd.wait()
+        # cmd.stdin.write("start_record cf.json")
+        # cmd.wait()
+
         print('start error return code: ', cmd.returncode)
         print('start error2: ', cmd.stderr.read())
         print('start stdout: ', cmd.stdout.read())
@@ -121,13 +128,11 @@ while True:  # Event Loop
         window['start_text'].update('                               ')
         window['setup_text'].update('                               ')
 
-        cmd.stdin.write("stop_record cf.json")
-        cmd.wait()
         cmd = subprocess.Popen(stop_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         cmd.wait()
-        cmd.stdin.write("stop_record cf.json")
-        cmd.wait()
+        # cmd.stdin.write("stop_record cf.json")
+        # cmd.wait()
         print('stop error return code: ', cmd.returncode)
         print('stop error2: ', cmd.stderr.read())
         print('stop stdout: ', cmd.stdout.read())
