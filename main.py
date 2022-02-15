@@ -7,7 +7,7 @@ from fun_microDoppler_2243_complex import microDoppler
 from fun_rangeDoppler_2243_complex import rangeDoppler
 from helpers import convert_to_bytes
 
-fname = 'data/raw_adc.bin'
+fname = 'data/raw_data_Raw_0.bin'
 sudo_password = '190396'
 cwd = '/home/emre/Desktop/77ghz/CLI/Release'
 radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_receive_test/' \
@@ -15,10 +15,10 @@ radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_rece
 radar_cmd = './setup_radar'
 export_cmd = 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$pwd'
 # env = dict(os.environ)
-env = os.environ.copy()
-env['LD_LIBRARY_PATH'] = cwd + ':' + os.getcwd()
-os.environ["LD_LIBRARY_PATH"] = cwd  # + ':' + os.getcwd()
-print(env)
+# env = os.environ.copy()
+# env['LD_LIBRARY_PATH'] = cwd + ':' + os.getcwd()
+os.environ["LD_LIBRARY_PATH"] = cwd  # + ':' + os.getcwd() # error code 127 when not executed
+# print(env)
 
 # os.system("LD_LIBRARY_PATH={}".format(os.getcwd()))
 
@@ -28,8 +28,11 @@ print(env)
 #     os.getcwd(), env.get('LD_LIBRARY_PATH', ''))
 # print(env)
 
-fpga_cmd = './DCA1000EVM_CLI_Control fpga_record cf.json'.split()
-record_cmd = './DCA1000EVM_CLI_Control record_record cf.json'.split()
+dca = './DCA1000EVM_CLI_Control'
+
+fpga_cmd = './DCA1000EVM_CLI_Control fpga cf.json'.split()
+# fpga_cmd = ["./DCA1000EVM_CLI_Control", "fpga cf.json"]
+record_cmd = './DCA1000EVM_CLI_Control record cf.json'.split()
 start_cmd = './DCA1000EVM_CLI_Control start_record cf.json'.split()
 stop_cmd = './DCA1000EVM_CLI_Control stop_record cf.json'.split()
 
@@ -70,31 +73,49 @@ while True:  # Event Loop
         #                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         # print('setup_radar: ', std.stderr)
 
-        cmd = subprocess.Popen(['echo', sudo_password], cwd=radar_path, stdout=subprocess.PIPE)
-        cmd.wait()
-        print('sudopass: ', cmd.stdout.read())
-        cmd = subprocess.Popen(['sudo', '-S'] + [radar_cmd], cwd=radar_path, stdin=cmd.stdout,
+        pwd = subprocess.Popen(['echo', sudo_password], cwd=radar_path, stdout=subprocess.PIPE)
+        pwd.wait()
+        print('sudopass: ', pwd.stdout.read())
+        x = ['sudo', '-S'] + [radar_cmd]
+        print(x)
+        cmd = subprocess.Popen(['sudo', '-S'] + [radar_cmd], cwd=radar_path, stdin=pwd.stdout,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         cmd.wait()
-        print('setup_radar: ', cmd.stderr.read())
+        print('setup_radar error return code: ', cmd.stderr.read())
         # print('setup_radar21: ', cmd.stdout.read())
 
-        # print(export_cmd)
-        # cmd = subprocess.Popen(['export', export_cmd], cwd=cwd, stdin=cmd.stdout, shell=True, env=env,
+        # cmd = subprocess.Popen(['export', export_cmd], cwd=cwd, stdin=cmd.stdout, shell=True,  # env=env,
         #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # cmd.wait()
         # print('export: ', cmd.stdout.read())
 
-        cmd = subprocess.run(fpga_cmd, cwd=cwd, stdin=subprocess.PIPE, shell=True, env=env,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        print('fpga: ', cmd)
-        # cmd.wait()
-        print('fpga: ', cmd.stderr.read())
+        # cmd = subprocess.Popen(fpga_cmd, cwd=cwd, shell=True,  # env=env,
+        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
 
-        cmd = subprocess.Popen(record_cmd, cwd=cwd, stdin=cmd.stdout, shell=True,  env=env,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # cmd = subprocess.Popen(dca, cwd=cwd, shell=True, text=True, stdin=subprocess.PIPE,  # env=env,
+        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+        # cmd.wait()
+        # cmd.stdin.write("fpga cf.json")
+        # cmd.wait()
+        # cmd.stdin.write("record cf.json")
+        # cmd.wait()
+        # cmd.stdin.write("start_record cf.json")
+        # cmd.wait()
+        x = ['sudo', '-S'] + fpga_cmd
+        print(x)
+        cmd = subprocess.Popen(fpga_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  # text=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         cmd.wait()
-        print('record: ', cmd.stdout.read())
+        print('fpga error return code: ', cmd.returncode)
+        print('fpga error2: ', cmd.stderr.read())
+        print('fpga stdout: ', cmd.stdout.read())
+
+        cmd = subprocess.Popen(record_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  # text=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+        cmd.wait()
+        print('record error return code: ', cmd.returncode)
+        print('record error2: ', cmd.stderr.read())
+        print('record stdout: ', cmd.stdout.read())
 
         window['setup_text'].update('Radar is ready to go!')
 
@@ -103,54 +124,30 @@ while True:  # Event Loop
         window['rd_text'].update('')
         window['stop_text'].update('                             ')
         window['start_text'].update('Go!                            ')
-        # os.system('cd /home/emre/Desktop/77ghz/CLI/Release')
-        # os.system('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$pwd')
-        # os.system('./DCA1000EVM_CLI_Control start_record cf.json')
-        # std1 = subprocess.Popen(export_cmd, stdin=subprocess.PIPE, cwd=cwd, shell=True, stdout=subprocess.PIPE)
-        # subprocess.run(lib_cfg_cmd, cwd=cwd, shell=True)
-        # std2 = subprocess.Popen(fpga_cmd, stdin=subprocess.PIPE, cwd=cwd, shell=True, stdout=subprocess.PIPE)
-        # std3 = subprocess.Popen(record_cmd, stdin=subprocess.PIPE, cwd=cwd, shell=True, stdout=subprocess.PIPE)
-        # std = subprocess.run(export_cmd, stdin=subprocess.PIPE, cwd=cwd, shell=True,
-        #                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        # # std.wait()
-        # # output = std.stdout.read().decode()
-        # # print(output)
-        # print('export: ', std.stdout)
-        #
-        # std = subprocess.run(fpga_cmd, stdin=subprocess.PIPE, cwd=cwd, shell=True,
-        #                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        # # std.wait()
-        # # output = std.stdout.read().decode()
-        # # print(output)
-        # print('fpga: ', std.stdout)
-        #
-        # std = subprocess.Popen(record_cmd, stdin=subprocess.PIPE, cwd=cwd, shell=True,
-        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # std.wait()
-        # output = std.stdout.read().decode()
-        # print(output)
-        # print(std.stdout)
-        #
-        # std = subprocess.Popen(start_cmd, stdin=subprocess.PIPE, cwd=cwd, shell=True,
-        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # std.wait()
-        # output = std.stdout.read().decode()
-        # print(output)
-        cmd = subprocess.Popen(start_cmd, cwd=cwd, stdin=subprocess.PIPE, shell=True, env=env,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         cmd.wait()
-        print('start: ', cmd.stdout.read())
+        print('start error return code: ', cmd.returncode)
+        print('start error2: ', cmd.stderr.read())
+        print('start stdout: ', cmd.stdout.read())
 
     elif event == '2. Stop Recording':
         window['md_text'].update('                               ')
         window['rd_text'].update('')
         window['stop_text'].update('Done!                        ')
         window['start_text'].update('                               ')
-        # subprocess.run(stop_cmd, cwd=cwd)
-        cmd = subprocess.Popen(stop_cmd, cwd=cwd, stdin=subprocess.PIPE, shell=True, env=env,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        cmd.stdin.write("stop_record cf.json")
         cmd.wait()
-        print('stop: ', cmd.stderr.read())
+        cmd = subprocess.Popen(stop_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  text=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+        cmd.wait()
+        cmd.stdin.write("stop_record cf.json")
+        cmd.wait()
+        print('stop error return code: ', cmd.returncode)
+        print('stop error2: ', cmd.stderr.read())
+        print('stop stdout: ', cmd.stdout.read())
 
     elif event == '3. Micro-Doppler Signature':
         window['md_text'].update('Generating Micro-Doppler Signature...')
