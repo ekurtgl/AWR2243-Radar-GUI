@@ -105,6 +105,8 @@ while True:  # Event Loop
             window['setup_text'].update('Radar is failed to setup (Restart needed)!')
 
     elif event == '1. Start Recording':
+        window['-IMAGE-'].update('data/md.png')
+        window['-VIDEO-'].update('data/rd.png')
         window['md_text'].update('                               ')
         window['rd_text'].update('')
         window['stop_text'].update('                             ')
@@ -112,7 +114,7 @@ while True:  # Event Loop
         window['setup_text'].update('                               ')
 
         cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=False)  # , check=True)
         cmd.wait()
         # cmd.stdin.write("start_record cf.json")
         # cmd.wait()
