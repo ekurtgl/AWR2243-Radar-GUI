@@ -28,6 +28,14 @@ os.environ["LD_LIBRARY_PATH"] = cwd  # + ':' + os.getcwd() # error code 127 when
 #     os.getcwd(), env.get('LD_LIBRARY_PATH', ''))
 # print(env)
 
+CREATE_NO_WINDOW = 0x08000000
+# startupinfo = None
+# if os.name == 'nt':
+# startupinfo = subprocess.STARTUPINFO()
+# startupinfo.wShowWindow = SW_HIDE
+# startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+
 dca = './DCA1000EVM_CLI_Control'
 
 fpga_cmd = './DCA1000EVM_CLI_Control fpga cf.json'.split()
@@ -102,7 +110,7 @@ while True:  # Event Loop
         if cmd.returncode == 0:
             window['setup_text'].update('Radar is ready to go!')
         else:
-            window['setup_text'].update('Radar is failed to setup (Restart needed)!')
+            window['setup_text'].update('Radar is set already!')
 
     elif event == '1. Start Recording':
         window['-IMAGE-'].update('data/md.png')
@@ -114,7 +122,7 @@ while True:  # Event Loop
         window['setup_text'].update('                               ')
 
         cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=False)  # , check=True)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         cmd.wait()
         # cmd.stdin.write("start_record cf.json")
         # cmd.wait()
@@ -129,6 +137,26 @@ while True:  # Event Loop
         window['stop_text'].update('Done!                        ')
         window['start_text'].update('                               ')
         window['setup_text'].update('                               ')
+
+        pwd = subprocess.Popen(['echo', sudo_password], cwd=radar_path, stdout=subprocess.PIPE)
+        pwd.wait()
+        print('sudopass: ', pwd.stdout.read())
+
+        # cmd = subprocess.Popen(['sudo', '-S', 'kill', '`ps -e | grep -i gnome-terminal`'], cwd=cwd, shell=False,
+        #                        stdin=pwd.stdout, text=True,
+        #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+        # cmd.wait()
+
+        pid = subprocess.check_output(['pgrep gnome-terminal'], shell=True)  # , check=True)
+        print('pid stdoutstr: ' + str(pid.decode())[:-1] + '-')
+
+        cmd = subprocess.Popen(['kill', str(pid.decode())[:-1]], cwd=cwd, shell=False,
+                               stdin=subprocess.PIPE, text=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+        cmd.wait()
+        print('exit error return code: ', cmd.returncode)
+        print('exit error2: ', cmd.stderr.read())
+        print('exit stdout: ', cmd.stdout.read())
 
         cmd = subprocess.Popen(stop_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
