@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 import PySimpleGUI as sg
 
@@ -138,15 +139,11 @@ while True:  # Event Loop
         window['start_text'].update('                               ')
         window['setup_text'].update('                               ')
 
-        pwd = subprocess.Popen(['echo', sudo_password], cwd=radar_path, stdout=subprocess.PIPE)
-        pwd.wait()
-        print('sudopass: ', pwd.stdout.read())
-
         # cmd = subprocess.Popen(['sudo', '-S', 'kill', '`ps -e | grep -i gnome-terminal`'], cwd=cwd, shell=False,
         #                        stdin=pwd.stdout, text=True,
         #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         # cmd.wait()
-
+        time.sleep(2)
         pid = subprocess.check_output(['pgrep gnome-terminal'], shell=True)  # , check=True)
         print('pid stdoutstr: ' + str(pid.decode())[:-1] + '-')
 

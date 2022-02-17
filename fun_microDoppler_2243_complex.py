@@ -71,13 +71,28 @@ def microDoppler(fname):
         # fig.savefig(savename, dpi=200)
 
         # gcf (with axes)
-        plt.imshow(20 * np.log10((abs(sx2) / maxval)), cmap='jet', norm=norm, aspect="auto",
+        im = plt.imshow(20 * np.log10((abs(sx2) / maxval)), cmap='jet', norm=norm, aspect="auto",
                    extent=[0, duration, -prf / 2, prf / 2])
         plt.xlabel('Time (sec)')
         plt.ylabel('Frequency (Hz)')
         # plt.ylim([-prf/6, prf/6])
         plt.title('Radar Micro-Doppler Spectrogram')
         fig.savefig(savename, dpi=200)
+        # ax.set_axis_off()
+        # fig.add_axes(ax)
+        # ax.imshow(your_image, aspect='auto')
+        # plt.axis('off')
+        # fig.savefig(savename.replace('.', '_im.'), bbox_inches=extent)
+        plt.axis('off')
+        plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
+                        labelright='off', labelbottom='off')
+        # ax.set_title('')
+        im.get_figure().gca().set_title("")
+        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
 
-        frame = plt.gcf()
+        plt.savefig(savename.replace('.', '_im.'), bbox_inches='tight', transparent=True, pad_inches=0)
+
+        # plt.imsave(savename.replace('.', '_im.'), ax.get_images())
+
+        # frame = plt.gcf()
 
