@@ -77,7 +77,7 @@ def microDoppler(fname):
         plt.ylabel('Frequency (Hz)')
         # plt.ylim([-prf/6, prf/6])
         plt.title('Radar Micro-Doppler Spectrogram')
-        fig.savefig(savename, dpi=200)
+        fig.savefig(savename, transparent=True, dpi=200)
         # ax.set_axis_off()
         # fig.add_axes(ax)
         # ax.imshow(your_image, aspect='auto')
