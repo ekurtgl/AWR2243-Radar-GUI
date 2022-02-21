@@ -34,7 +34,7 @@ DFmax = velmax / (c / fc / 2)
 # V_GRID = (c / fc / 2) * DOPP_GRID
 
 
-def rangeDoppler(fname):
+def rangeDoppler(fname, window):
     f = open(fname)
     data = np.fromfile(f, dtype=np.int16)
     f.close()
@@ -71,6 +71,8 @@ def rangeDoppler(fname):
         rd_frame = rd_frame[rd_frame.shape[0] // 2:]  # second half after fft
         rd_frame = rd_frame[: int(rd_frame.shape[0] // Rmax * rangelim)]  # desired max range
         maxval = np.max(np.abs(rd_frame))
+        window['rd_text'].update('Generating Range-Doppler Map ' + str(int(i / NoF * 100)) + '%')
+        window.refresh()
 
         if i == 0:
             fig = plt.figure(frameon=False)
@@ -86,6 +88,7 @@ def rangeDoppler(fname):
             plt.colorbar()
             plt.draw()
             # plt.pause(1e-3)
+
             if save_rd_map:
                 import cv2
 

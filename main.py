@@ -120,7 +120,7 @@ while True:  # Event Loop
         window['rd_text'].update('')
         window['stop_text'].update('                             ')
         window['start_text'].update('Go!                            ')
-        window['setup_text'].update('                               ')
+        # window['setup_text'].update('                               ')
 
         cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -137,7 +137,7 @@ while True:  # Event Loop
         window['rd_text'].update('')
         window['stop_text'].update('Done!                        ')
         window['start_text'].update('                               ')
-        window['setup_text'].update('                               ')
+        # window['setup_text'].update('                               ')
 
         # cmd = subprocess.Popen(['sudo', '-S', 'kill', '`ps -e | grep -i gnome-terminal`'], cwd=cwd, shell=False,
         #                        stdin=pwd.stdout, text=True,
@@ -175,7 +175,7 @@ while True:  # Event Loop
     elif event == '4. Range-Doppler Map':
         window['rd_text'].update('Generating Range-Doppler Map...')
         window.refresh()
-        num_frames = rangeDoppler(fname)
+        num_frames = rangeDoppler(fname, window)
         for i in range(num_frames):
             window.refresh()
             savename = fname[:-4] + '_frame_' + str(i) + '.png'
