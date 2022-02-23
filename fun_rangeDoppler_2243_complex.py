@@ -1,7 +1,10 @@
 import numpy as np
+import cv2
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from PIL import Image
+import io
 from helpers import fig2img
 
 
@@ -121,6 +124,20 @@ def rangeDoppler(fname, window):
                 savename = fname[:-4] + '_frame_' + str(i) + '.png'
                 fig.savefig(savename, dpi=200)
                 # cv2.imwrite(savename, cv2.resize(final, (256, 256)))
+        # image playing
+        # final = im.get_array()
+        # final[final < vmin] = vmin
+        # final = cv2.applyColorMap(cv2.normalize(final, None, vmin,
+        #                                         None, cv2.NORM_MINMAX), cv2.COLORMAP_JET)
+        # final = final[:, :, ::-1]  # bgr to rgb
+        # # print(final.shape)
+        # final = Image.fromarray(final).resize(size=(700, 700))
+        # bio = io.BytesIO()
+        # final.save(bio, format="PNG")
+        # del final
+        # window['-VIDEO-'].update(data=bio.getvalue())
+        # window['rd_text'].update('Playing! Time: ' + str(round(i / 25, 1)))
+        # window.refresh()
     return NoF
 
 
