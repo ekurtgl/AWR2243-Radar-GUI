@@ -133,6 +133,8 @@ while True:  # Event Loop
         print('start stdout: ', cmd.stdout.read())
 
     elif event == '2. Stop Recording':
+        window['stop_text'].update('Stopping...                        ')
+        window.refresh()
         window['md_text'].update('                               ')
         window['rd_text'].update('')
         window['stop_text'].update('Done!                        ')
