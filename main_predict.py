@@ -46,9 +46,20 @@ record_cmd = './DCA1000EVM_CLI_Control record cf.json'.split()
 start_cmd = './DCA1000EVM_CLI_Control start_record cf.json'.split()
 stop_cmd = './DCA1000EVM_CLI_Control stop_record cf.json'.split()
 
-layout = [[sg.Image('data/md.png', key='-IMAGE-', size=(700, 700)),
+bcols = ['blue', 'orange']
+BAR_WIDTH = 250
+BAR_SPACING = 300
+EDGE_OFFSET = 100
+GRAPH_SIZE = (700, 700)
+DATA_SIZE = (700, 120)
+graph = sg.Graph(GRAPH_SIZE, (0, 0), DATA_SIZE, background_color='white')
+graph.erase()
+myfont = "Ariel 18"
+
+layout = [[sg.Text('Radar User Interface', size=(50, 2), font=('courier', 20))],
+          [sg.Image('data/md.png', key='-IMAGE-', size=(700, 700)),
            sg.VSep(),
-           sg.Image('data/rd.png', key='-VIDEO-', size=(700, 700)),
+           graph,
            sg.VSep(),
            [sg.Button('Setup Radar', button_color=('white', 'black'), size=(18, 2), font=('courier', 20)),
             sg.Text('', key='setup_text', font=('courier', 20))]],
@@ -62,9 +73,7 @@ layout = [[sg.Image('data/md.png', key='-IMAGE-', size=(700, 700)),
           [sg.Button('3. Micro-Doppler Signature', button_color=('white', 'blue'), size=(18, 2), font=('courier', 20)),
            sg.Text('                               ', key='md_text', font=('courier', 20)),
            sg.VSep(),
-           sg.Button('4. Range-Doppler Map', button_color=('white', 'blue'), size=(18, 2), font=('courier', 20)),
-           sg.Text('                     ', key='rd_text', font=('courier', 20))],
-          [sg.Button('Predict', button_color=('black', 'yellow'), size=(18, 2), font=('courier', 20)),
+           sg.Button('4. Predict', button_color=('black', 'yellow'), size=(18, 2), font=('courier', 20)),
            sg.Text('', key='pred_text', font=('courier', 20))]]
 
 
@@ -177,22 +186,35 @@ while True:  # Event Loop
         window['md_text'].update('Done!                          ')
         window.refresh()
 
-    elif event == '4. Range-Doppler Map':
-        window['rd_text'].update('Generating Range-Doppler Map...')
-        window.refresh()
-        num_frames = rangeDoppler(fname, window)
-        for i in range(num_frames):
-            window.refresh()
-            savename = fname[:-4] + '_frame_' + str(i) + '.png'
-            window['-VIDEO-'].update(data=convert_to_bytes(savename, resize=(700, 700)))
-            window['rd_text'].update('Playing! Time: ' + str(round(i/25, 1)))
-            window.refresh()
-
-    elif event == 'Predict':
+    elif event == '4. Predict':
         window['pred_text'].update('Predicting...')
         window.refresh()
         pred = prediction()
-        window['pred_text'].update(str(pred*100))
+        maybe = pred[0][0] * 100
+        you = pred[0][1] * 100
+
+        # add offset for visualization purposes
+        offset = 3
+        if maybe > you:
+            you += offset
+            you_offset = offset
+            maybe_offset = 0
+        else:
+            maybe += offset
+            you_offset = 0
+            maybe_offset = offset
+
+        graph.draw_rectangle(top_left=(0 * BAR_SPACING + EDGE_OFFSET, maybe),
+                             bottom_right=(0 * BAR_SPACING + EDGE_OFFSET + BAR_WIDTH, 0), fill_color=bcols[0])
+        graph.draw_text(text='MAYBE --> ' + str(round(maybe - maybe_offset, 2))+'%',
+                        location=(0 * BAR_SPACING + EDGE_OFFSET + 120, maybe + 10), color=bcols[0], font=myfont)
+        graph.draw_rectangle(top_left=(1 * BAR_SPACING + EDGE_OFFSET, you),
+                             bottom_right=(1 * BAR_SPACING + EDGE_OFFSET + BAR_WIDTH, 0), fill_color=bcols[1])
+        graph.draw_text(text='YOU --> ' + str(round(you - you_offset, 2)) + '%',
+                        location=(1 * BAR_SPACING + EDGE_OFFSET + 120, you + 10), color=bcols[1], font=myfont)
+        window.refresh()
+
+        window['pred_text'].update('Predicted!')
         window.refresh()
 
 window.Close()
