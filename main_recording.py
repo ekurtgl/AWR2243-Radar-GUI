@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import time
@@ -13,6 +14,7 @@ cwd = '/home/emre/Desktop/77ghz/CLI/Release'
 radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_receive_test/' \
              'open_radar_initiative-new_receive_test/setup_radar/build'
 leap_main_path = '/home/emre/PycharmProjects/LeapMotion/'
+radar_fps = 25
 
 radar_cmd = './setup_radar'
 setup_leap = 'sudo leapd'.split()
@@ -77,7 +79,6 @@ while True:  # Event Loop
 
     if event == 'Setup Radar':
         window['md_text'].update('                               ')
-        window['rd_text'].update('')
         window['stop_text'].update('                             ')
         window['start_text'].update('                               ')
 
@@ -129,37 +130,54 @@ while True:  # Event Loop
         window['stop_text'].update('                             ')
         window['start_text'].update('Go!                            ')
         # window['setup_text'].update('                               ')
+        # _, values = window.read()
+
+        print('duration: ', values['duration'])
         data_class = values['class_list'].split()[0]
         now = datetime.now()
         main_path = '/home/emre/PycharmProjects/RadarGUI/data/'
         date_time = now.strftime("%Y_%m_%d_%H_%M_%S_")
-        filename = main_path + date_time + 'subj' + values['subject'] + '_' + values['exp_list'] + '_class' + data_class
+        fname = date_time + 'subj' + values['subject'] + '_' + values['exp_list'] + '_class' + data_class
+        filename = main_path + fname
 
         if values['leap_motion_check']:
-
             leap_cmd = 'python2 ' + leap_main_path + 'main.py --filename ' + filename + '.data' + \
                        ' --duration ' + values['duration']
 
             cmd = subprocess.Popen(leap_cmd.split(), cwd=cwd, shell=False, stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
 
-            print('leap')
+            # print('leap')
+        json_file = cwd + '/cf.json'
+        a_file = open(json_file, "r")
+        json_object = json.load(a_file)
+        # print(json_object)
+        a_file.close()
+        # print(json_object['DCA1000Config']['captureConfig']['framesToCapture'])
+        # json_object['DCA1000Config']['captureConfig']['framesToCapture'] = radar_fps * int(values['duration'])
+        json_object['DCA1000Config']['captureConfig']['captureStopMode'] = 'duration'
+        json_object['DCA1000Config']['captureConfig']['durationToCapture_ms'] = int(values['duration']) * 1000
+        json_object['DCA1000Config']['captureConfig']['filePrefix'] = fname
+        a_file = open(json_file, "w")
+        json.dump(json_object, a_file)
+        a_file.close()
+        # time.sleep(1)
+        # print(json_object)
 
-        cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        cmd.wait()
-        # cmd.stdin.write("start_record cf.json")
-        # cmd.wait()
+        if values['77_front_check']:
+            cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  # text=True,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            cmd.wait()
+            # cmd.stdin.write("start_record cf.json")
+            # cmd.wait()
 
-        print('start error return code: ', cmd.returncode)
-        print('start error2: ', cmd.stderr.read())
-        print('start stdout: ', cmd.stdout.read())
+            print('start error return code: ', cmd.returncode)
+            print('start error2: ', cmd.stderr.read())
+            print('start stdout: ', cmd.stdout.read())
 
     elif event == '2. Stop Recording':
         window['stop_text'].update('Stopping...                        ')
-        window.refresh()
         window['md_text'].update('                               ')
-        window['rd_text'].update('')
         window['stop_text'].update('Done!                        ')
         window['start_text'].update('                               ')
         # window['setup_text'].update('                               ')
@@ -168,17 +186,21 @@ while True:  # Event Loop
         #                        stdin=pwd.stdout, text=True,
         #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
         # cmd.wait()
-        time.sleep(2)
-        pid = subprocess.check_output(['pgrep gnome-terminal'], shell=True)  # , check=True)
-        print('pid stdoutstr: ' + str(pid.decode())[:-1] + '-')
+        # time.sleep(2)
+        try:
+            pid = subprocess.check_output(['pgrep gnome-terminal'], shell=True)  # , check=True)
+            print('pid stdoutstr: ' + str(pid.decode())[:-1] + '-')
 
-        cmd = subprocess.Popen(['kill', str(pid.decode())[:-1]], cwd=cwd, shell=False,
-                               stdin=subprocess.PIPE, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
-        cmd.wait()
-        print('exit error return code: ', cmd.returncode)
-        print('exit error2: ', cmd.stderr.read())
-        print('exit stdout: ', cmd.stdout.read())
+            cmd = subprocess.Popen(['kill', str(pid.decode())[:-1]], cwd=cwd, shell=False,
+                                   stdin=subprocess.PIPE, text=True,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+            cmd.wait()
+            print('exit error return code: ', cmd.returncode)
+            print('exit error2: ', cmd.stderr.read())
+            print('exit stdout: ', cmd.stdout.read())
+
+        except:
+            print('No open command windows!')
 
         cmd = subprocess.Popen(stop_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
@@ -192,8 +214,8 @@ while True:  # Event Loop
     elif event == '3. Micro-Doppler Signature':
         window['md_text'].update('Generating Micro-Doppler Signature...')
         window.refresh()
-        microDoppler(fname)
-        window['-IMAGE-'].update(data=convert_to_bytes(fname[:-4] + '_py.png', resize=(700, 700)))
+        microDoppler('data/' + fname + '_Raw_0.bin')
+        window['-IMAGE-'].update(data=convert_to_bytes('data/' + fname + '_Raw_0_py.png', resize=(700, 500)))
         window['md_text'].update('Done!                          ')
         window.refresh()
 
