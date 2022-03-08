@@ -30,6 +30,8 @@ Tc = idletime + adcStartTime + rampEndTime
 # prf = 1 / dT
 velmax = lamda / (Tc * 4)
 DFmax = velmax / (c / fc / 2)
+isBPM = True
+isTDM = True
 # rResol = c / (2 * Bw)
 # vResol = lamda / (2 * Tf)
 # RNGD2_GRID = np.linspace(0, Rmax, numADCSamples)
@@ -45,8 +47,8 @@ def rangeDoppler(fname, window):
     # Parameters
     SweepTime = 40e-3
     NTS = 256
-    numTX = 1
-    NoC = 255
+    numTX = 3
+    NoC = 88
     NPpF = numTX * NoC
     numRX = 4
     numChirps = int(np.ceil(len(data) / 2 / NTS / numRX))
@@ -67,9 +69,20 @@ def rangeDoppler(fname, window):
     data = data.T
     data = data.reshape(NTS, numChirps, numRX, order='F')
 
+    # if BPM and TDM enabled
+    if isTDM and isBPM:
+        prf = 1 / dT / numTX
+        rem = -(data.shape[1] % 3)
+        if rem:
+            data = data[:, :rem, :]
+        chirp1 = 1 / 2 * (data[:, 0::3, :] + data[:, 1::3, :])
+        chirp2 = 1 / 2 * (data[:, 0::3, :] - data[:, 1::3, :])
+        chirp3 = data[:, 2::3, :]
+        data = np.concatenate([chirp1, chirp2, chirp3], -1)
+
     for i in tqdm(range(NoF)):
         # rd_frame = data[:, i*NoC: (i+1)*NoC, 0].T - np.mean(data[:, i*NoC: (i+1)*NoC, 0], 1)
-        rd_frame = data[:, i*NoC: (i+1)*NoC, 0].T
+        rd_frame = data[:, i*NoC: (i+1)*NoC, -1].T
         rd_frame = np.fft.fftshift(np.fft.fft2(rd_frame.T, axes=(0, 1)), 1)
         rd_frame = rd_frame[rd_frame.shape[0] // 2:]  # second half after fft
         rd_frame = rd_frame[: int(rd_frame.shape[0] // Rmax * rangelim)]  # desired max range
@@ -124,7 +137,7 @@ def rangeDoppler(fname, window):
                 savename = fname[:-4] + '_frame_' + str(i) + '.png'
                 fig.savefig(savename, dpi=200)
                 # cv2.imwrite(savename, cv2.resize(final, (256, 256)))
-        # image playing
+        # playing w.o. saving frames added but commented out
         # final = im.get_array()
         # final[final < vmin] = vmin
         # final = cv2.applyColorMap(cv2.normalize(final, None, vmin,

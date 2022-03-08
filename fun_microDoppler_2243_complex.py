@@ -11,9 +11,10 @@ def microDoppler(fname):
     save_spectrograms = True
     SweepTime = 40e-3
     NTS = 256
-    numADCSamples = NTS
-    numTX = 1
-    NoC = 255
+    numTX = 3
+    NoC = 88
+    isBPM = True
+    isTDM = True
     NPpF = numTX * NoC
     numRX = 4
     numChirps = int(np.ceil(len(data) / 2 / NTS / numRX))
@@ -33,18 +34,31 @@ def microDoppler(fname):
     data = data.T
     data = data.reshape(NTS, numChirps, numRX, order='F')
 
+    # if BPM and TDM enabled
+    if isTDM and isBPM:
+        prf = 1 / dT / numTX
+        rem = -(data.shape[1] % 3)
+        if rem:
+            data = data[:, :rem, :]
+        chirp1 = 1/2 * (data[:, 0::3, :] + data[:, 1::3, :])
+        chirp2 = 1/2 * (data[:, 0::3, :] - data[:, 1::3, :])
+        chirp3 = data[:, 2::3, :]
+        data = np.concatenate([chirp1, chirp2, chirp3], -1)
+
+    print(data.shape)
+
     # Range FFT
     rp = np.fft.fft(data)
 
     # micro-Doppler Spectrogram
-    rBin = np.arange(18, 23)  # 20 30
+    rBin = np.arange(18, 25)  # 20 30
     nfft = 2 ** 12
     window = 256
     noverlap = 200
     shift = window - noverlap
 
     y2 = np.sum(rp[rBin, :], 0)
-    sx = stft(y2[:, 0], window, nfft, shift)
+    sx = stft(y2[:, -1], window, nfft, shift)
     sx2 = np.abs((np.fft.fftshift(sx, 0)))
 
     # Plot
@@ -77,7 +91,7 @@ def microDoppler(fname):
         plt.ylabel('Frequency (Hz)')
         # plt.ylim([-prf/6, prf/6])
         plt.title('Radar Micro-Doppler Spectrogram')
-        fig.savefig(savename, transparent=True, dpi=200)
+        fig.savefig(savename, transparent=False, dpi=200)
         # ax.set_axis_off()
         # fig.add_axes(ax)
         # ax.imshow(your_image, aspect='auto')
