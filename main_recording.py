@@ -34,6 +34,11 @@ with open(class_fname) as f:
     # lines = f.readlines()  # ignore \n
     lines = f.read().splitlines()
 
+
+def time_as_int():
+    return int(round(time.time() * 100))
+
+
 sg.theme("DarkTeal2")
 
 layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
@@ -57,6 +62,7 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.InputText(size=(10, 5), key='duration', font=('courier', 20))],
           [sg.Image('data/md.png', key='-IMAGE-', size=(700, 500)),
            sg.VSep(),
+           sg.Text('  TIME:', size=(15, 2), key='time', font=('courier', 80)),
            [sg.Button('Setup Radar', button_color=('white', 'black'), size=(18, 2), font=('courier', 20)),
             sg.Text('', key='setup_text', font=('courier', 20)),
             sg.Button('Setup Leap Motion', button_color=('white', 'black'), size=(18, 2), font=('courier', 20))]],
@@ -155,6 +161,7 @@ while True:  # Event Loop
         a_file.close()
         # print(json_object['DCA1000Config']['captureConfig']['framesToCapture'])
         # json_object['DCA1000Config']['captureConfig']['framesToCapture'] = radar_fps * int(values['duration'])
+        # json_object['DCA1000Config']['captureConfig']['captureStopMode'] = 'frames'
         json_object['DCA1000Config']['captureConfig']['captureStopMode'] = 'duration'
         json_object['DCA1000Config']['captureConfig']['durationToCapture_ms'] = int(values['duration']) * 1000
         json_object['DCA1000Config']['captureConfig']['filePrefix'] = fname
@@ -165,6 +172,7 @@ while True:  # Event Loop
         # print(json_object)
 
         if values['77_front_check']:
+            print('starting...')
             cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE,  # text=True,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             cmd.wait()
@@ -174,6 +182,16 @@ while True:  # Event Loop
             print('start error return code: ', cmd.returncode)
             print('start error2: ', cmd.stderr.read())
             print('start stdout: ', cmd.stdout.read())
+
+        left_time = int(values['duration'])
+
+        for i in range(left_time):
+            window['time'].update('  TIME: ' + str(left_time))
+            window.refresh()
+            time.sleep(1)
+            left_time -= 1
+        window['time'].update('  Finished!')
+        window.refresh()
 
     elif event == '2. Stop Recording':
         window['stop_text'].update('Stopping...                        ')
