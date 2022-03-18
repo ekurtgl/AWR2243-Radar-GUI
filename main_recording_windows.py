@@ -164,7 +164,6 @@ while True:  # Event Loop
             time.sleep(2)
 
         if values['77_front_check']:
-            print('starting...')
             '''json_file = cwd + '/cf.json'
             a_file = open(json_file, "r")
             json_object = json.load(a_file)
@@ -239,6 +238,14 @@ while True:  # Event Loop
             window.refresh()
             time.sleep(1)
             left_time -= 1
+
+        # go back to gui
+        if values['77_front_check']:
+            time.sleep(3)
+            keyboard.press(Key.alt_l)
+            keyboard.press(Key.tab)
+            keyboard.release(Key.tab)
+            keyboard.release(Key.alt_l)
 
         # if values['leap_motion_check']:
         #     cmd4leap.wait()
