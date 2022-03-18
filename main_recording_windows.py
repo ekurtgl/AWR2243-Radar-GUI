@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import time
+import signal
 import PySimpleGUI as sg
 
 from fun_microDoppler_2243_complex import microDoppler
@@ -11,8 +12,7 @@ from pynput.keyboard import Key, Controller
 
 # custom parameters/paths depending on the local computer
 data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
-kinect_path = 'C:\\Users\\emrek\\Desktop\\Technical\\ffmpeg\\bin\\' \
-              'ffmpeg.exe -f dshow -rtbufsize 2048M -i video="Kinect V2 Video Sensor"'
+kinect_path = 'C:\\Users\\emrek\\Desktop\\Technical\\ffmpeg\\bin\\ffmpeg.exe -f dshow -rtbufsize 2048M -i video="Kinect V2 Video Sensor"'
 sudo_password = '190396'
 cwd = data_path
 radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_receive_test/' \
@@ -156,19 +156,12 @@ while True:  # Event Loop
         if values['kinect_check']:
             kinect_cmd = kinect_path + ' -t ' + values['duration'] + ' "' + filename + '.mp4"'
             print(kinect_cmd)
-            cmd4kinect = subprocess.Popen(kinect_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
-                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+            cmd4kinect = subprocess.Popen('start ' + kinect_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             # cmd4kinect.wait()
             # print(cmd4kinect.stderr.read())
-            print('kinect')
-        if values['leap_motion_check']:
-            # leap_cmd = 'python2 ' + leap_main_path + 'main_leap.py --filename ' + filename + '.data' + \
-            #            ' --duration ' + values['duration']
-            leap_cmd2 = leap_main_path2 + ' --filename ' + filename + '.data' + ' --duration ' + values['duration']
-            cmd4leap = subprocess.Popen(leap_cmd2, cwd=cwd, shell=True, stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
-            # print('leap')
-
+            print('kinect recording ...')
+            time.sleep(2)
 
         if values['77_front_check']:
             print('starting...')
@@ -197,8 +190,9 @@ while True:  # Event Loop
             print('start stdout: ', cmd.stdout.read())'''
 
             # go to mmwave studio and type the filename (highlight it beforehand)
+            num_nonradar_sensors = values['kinect_check']
             keyboard.press(Key.alt_l)
-            for i in range(2):
+            for i in range(num_nonradar_sensors + 1):
                 keyboard.press(Key.tab)
                 keyboard.release(Key.tab)
                 time.sleep(0.1)
@@ -222,11 +216,21 @@ while True:  # Event Loop
                 keyboard.release(Key.enter)
                 time.sleep(0.1)
 
-            # go back to filename
+            # go back to filename section
             for i in range(2):
                 keyboard.press(Key.tab)
                 keyboard.release(Key.tab)
                 time.sleep(0.1)
+
+            print('front radar recording ...')
+
+        if values['leap_motion_check']:
+            # leap_cmd = 'python2 ' + leap_main_path + 'main_leap.py --filename ' + filename + '.data' + \
+            #            ' --duration ' + values['duration']
+            leap_cmd2 = leap_main_path2 + ' --filename ' + filename + '.data' + ' --duration ' + values['duration']
+            cmd4leap = subprocess.Popen('start ' + leap_cmd2, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+            print('leap recording ...')
 
         left_time = int(values['duration'])
 
@@ -235,6 +239,13 @@ while True:  # Event Loop
             window.refresh()
             time.sleep(1)
             left_time -= 1
+
+        # if values['leap_motion_check']:
+        #     cmd4leap.wait()
+        #     print(cmd4leap.stdout.read().decode())
+        # if values['kinect_check']:
+        #     time.sleep(1)
+        #     subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=cmd4kinect.pid))
         window['time'].update('  Finished!')
         window.refresh()
 
