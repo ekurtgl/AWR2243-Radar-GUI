@@ -161,7 +161,7 @@ while True:  # Event Loop
             # cmd4kinect.wait()
             # print(cmd4kinect.stderr.read())
             print('kinect recording ...')
-            time.sleep(2)
+            time.sleep(1.8)
 
         if values['77_front_check']:
             '''json_file = cwd + '/cf.json'
@@ -190,6 +190,7 @@ while True:  # Event Loop
 
             # go to mmwave studio and type the filename (highlight it beforehand)
             num_nonradar_sensors = values['kinect_check']
+            print('num_nonradar_sensors:', num_nonradar_sensors)
             keyboard.press(Key.alt_l)
             for i in range(num_nonradar_sensors + 1):
                 keyboard.press(Key.tab)
