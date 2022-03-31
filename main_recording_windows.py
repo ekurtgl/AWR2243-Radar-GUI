@@ -4,6 +4,7 @@ import subprocess
 import time
 import sys
 import signal
+import glob
 import PySimpleGUI as sg
 
 from fun_microDoppler_2243_complex import microDoppler
@@ -12,7 +13,8 @@ from datetime import datetime
 from pynput.keyboard import Key, Controller
 
 # custom parameters/paths depending on the local computer
-data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
+# data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
+data_path = 'D:\\Gallaudet_data\\'
 kinect_path = 'C:\\Users\\emrek\\Desktop\\Technical\\ffmpeg\\bin\\ffmpeg.exe -f dshow -rtbufsize 2048M -i video="Kinect V2 Video Sensor"'
 sudo_password = '190396'
 cwd = data_path
@@ -71,21 +73,21 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.InputText(size=(10, 5), key='duration', font=('courier', 12))],
           [sg.Image('data/md.png', key='-IMAGE-', size=(500, 300)),
            sg.VSep(),
-           sg.Text('  TIME:', size=(15, 2), key='time', font=('courier', 50)),
-           [sg.Button('Setup Radar', button_color=('white', 'black'), size=(18, 2), font=('courier', 12)),
-            sg.Text('', key='setup_text', font=('courier', 12)),
-            sg.Button('Setup Leap Motion', button_color=('white', 'black'), size=(18, 2), font=('courier', 12))]],
+           sg.Text('  TIME:', size=(150, 10), key='time', font=('courier', 20))],
+          # [sg.Button('Setup Radar', button_color=('white', 'black'), size=(18, 2), font=('courier', 12)),
+          #  sg.Text('', key='setup_text', font=('courier', 12)),
+          #  sg.Button('Setup Leap Motion', button_color=('white', 'black'), size=(18, 2), font=('courier', 12))]],
           [sg.Button('1. Start Recording', button_color=('white', 'green'), size=(18, 2), font=('courier', 12)),
-           sg.Text('                               ', key='start_text', font=('courier', 12)),
-           sg.VSep(),
-           sg.Button('2. Stop Recording', button_color=('white', 'red'), size=(18, 2), font=('courier', 12)),
-           sg.Text('                             ', key='stop_text', font=('courier', 12))],
+           sg.Text('                               ', key='start_text', font=('courier', 12))],
+          # sg.VSep(),
+          # sg.Button('2. Stop Recording', button_color=('white', 'red'), size=(18, 2), font=('courier', 12)),
+          # sg.Text('                             ', key='stop_text', font=('courier', 12))],
           [sg.Button('3. Micro-Doppler Signature', button_color=('white', 'blue'), size=(18, 2), font=('courier', 12)),
            sg.Text('                               ', key='md_text', font=('courier', 12)),
            sg.VSep(),
            sg.Exit(button_color=('white', 'black'), size=(18, 2), font=('courier', 12))]]
 
-window = sg.Window('Radar GUI', size=(1000, 650)).Layout(layout)
+window = sg.Window('Radar GUI', size=(1200, 600)).Layout(layout)
 
 while True:  # Event Loop
     event, values = window.Read()
@@ -142,8 +144,9 @@ while True:  # Event Loop
     elif event == '1. Start Recording':
         window['-IMAGE-'].update('data/md.png', size=(500, 300))
         window['md_text'].update('                               ')
-        window['stop_text'].update('                             ')
+        # window['stop_text'].update('                             ')
         window['start_text'].update('Go!                            ')
+        window['time'].update('TIME')
         # window['setup_text'].update('                               ')
         # _, values = window.read()
 
@@ -158,12 +161,13 @@ while True:  # Event Loop
         if values['kinect_check']:
             kinect_cmd = kinect_path + ' -t ' + values['duration'] + ' "' + filename + '.mp4"'
             print(kinect_cmd)
-            cmd4kinect = subprocess.Popen('start ' + kinect_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
-                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # cmd4kinect = subprocess.Popen('start ' + kinect_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+            #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            os.popen(kinect_cmd)
             # cmd4kinect.wait()
             # print(cmd4kinect.stderr.read())
             print('kinect recording ...')
-            time.sleep(1.8)
+            time.sleep(2.5)
 
         if values['orbbec_check']:
             orbbec_cmd = orbbec_main_path + ' --filename ' + filename + ' --duration ' + values['duration']
@@ -216,7 +220,7 @@ while True:  # Event Loop
             print('start stdout: ', cmd.stdout.read())'''
 
             # go to mmwave studio and type the filename (highlight it beforehand)
-            num_nonradar_sensors = values['kinect_check']
+            num_nonradar_sensors = 0  # values['kinect_check'] --> uncomment if you use subprocess for kinect or orbbec
             print('num_nonradar_sensors:', num_nonradar_sensors)
             keyboard.press(Key.alt_l)
             for i in range(num_nonradar_sensors + 1):
@@ -281,7 +285,19 @@ while True:  # Event Loop
         # if values['kinect_check']:
         #     time.sleep(1)
         #     subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=cmd4kinect.pid))
-        window['time'].update('  Finished!')
+        # window['time'].update('  Finished!')
+        saved_files = 'Recorded files: \n'
+        file_sizes = ''
+        search_path = filename + '*'
+        idx = [pos for pos, char in enumerate(filename) if char == '\\']
+        print(search_path)
+        cnt = 1
+        for file in glob.glob(filename + '*'):
+            saved_files += str(cnt) + '. ' + file[idx[-1]+1:] + '  -->  ' + str(round(os.path.getsize(file)/1e6, 1)) + \
+                           ' mb' + '\n'
+            # print(file)
+            cnt += 1
+        window['time'].update(saved_files, font=10)
         window.refresh()
 
     elif event == '2. Stop Recording':
@@ -323,8 +339,8 @@ while True:  # Event Loop
     elif event == '3. Micro-Doppler Signature':
         window['md_text'].update('Generating Micro-Doppler Signature...')
         window.refresh()
-        microDoppler('data/' + fname + '_Raw_0.bin')
-        window['-IMAGE-'].update(data=convert_to_bytes('data/' + fname + '_Raw_0_py.png', resize=(700, 500)))
+        microDoppler(data_path + '/' + fname + '_Raw_0.bin')
+        window['-IMAGE-'].update(data=convert_to_bytes(data_path + '/' + fname + '_Raw_0_py.png', resize=(500, 300)))
         window['md_text'].update('Done!                          ')
         window.refresh()
 
