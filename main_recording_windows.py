@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import time
+import sys
 import signal
 import PySimpleGUI as sg
 
@@ -18,7 +19,9 @@ cwd = data_path
 radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_receive_test/' \
              'open_radar_initiative-new_receive_test/setup_radar/build'
 leap_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\'
-leap_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\dist\\main_leap\\main_leap.exe'
+leap_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\main_leap_exe\\dist\\main_leap\\main_leap.exe'
+orbbec_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\orbbec_main_exe\\dist\\orbbec_opencv_v4\\orbbec_opencv_v4.exe'
+orbbec_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\'
 
 radar_fps = 25
 
@@ -51,8 +54,7 @@ sg.theme("DarkTeal2")
 layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
           [sg.Text('Sensors List:', size=(15, 2), font=('courier', 12)),
            sg.Checkbox('77 Front', default=False, key="77_front_check", size=(10, 10), font=('courier', 12)),
-           sg.Checkbox('77 Corner', default=False, key="77_corner_check", size=(10, 10), font=('courier', 12)),
-           sg.Checkbox('77 Side', default=False, key="77_side_check", size=(10, 10), font=('courier', 12)),
+           sg.Checkbox('Orbbec', default=False, key="orbbec_check", size=(10, 10), font=('courier', 12)),
            sg.Checkbox('Leap Motion', default=False, key="leap_motion_check", size=(15, 10), font=('courier', 12)),
            sg.Checkbox('Kinect', default=False, key="kinect_check", size=(10, 10), font=('courier', 12))],
           [sg.Text('Subject:', size=(8, 2), font=('courier', 12)),
@@ -62,7 +64,7 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.Combo(values=lines, default_value='TEST', key='class_list', size=(10, 10), font=('courier', 12)),
            sg.VSep(),
            sg.Text('Experiment:', size=(11, 2), font=('courier', 12)),
-           sg.Combo(values=['Exp1', 'Exp2', 'Exp3', 'Exp4'], default_value='TEST', key='exp_list', size=(5, 12),
+           sg.Combo(values=['0', '1', '2', '3', '4'], default_value='0', key='exp_list', size=(5, 12),
                     font=('courier', 12)),
            sg.VSep(),
            sg.Text('Duration (sec):', size=(15, 2), font=('courier', 12)),
@@ -149,7 +151,7 @@ while True:  # Event Loop
         data_class = values['class_list'].split()[0]
         now = datetime.now()
         date_time = now.strftime("%Y_%m_%d_%H_%M_%S_")
-        fname = date_time + 'subj' + values['subject'] + '_' + values['exp_list'] + '_class' + data_class
+        fname = date_time + 'subj' + values['subject'] + '_Exp' + values['exp_list'] + '_class' + data_class
         # filename = os.path.join(r'C:\Users', data_path) + fname
         filename = data_path + fname
 
@@ -162,6 +164,31 @@ while True:  # Event Loop
             # print(cmd4kinect.stderr.read())
             print('kinect recording ...')
             time.sleep(1.8)
+
+        if values['orbbec_check']:
+            orbbec_cmd = orbbec_main_path + ' --filename ' + filename + ' --duration ' + values['duration']
+            print(orbbec_cmd)
+            # cmd4orbbec = subprocess.Popen('start ' + orbbec_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+            #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # os.system(orbbec_cmd)  # works
+            os.popen(orbbec_cmd)
+            # os.execv(orbbec_main_path, [filename, values['duration']])
+            # os.spawnl(os.P_NOWAIT, orbbec_cmd)
+            # , executable=orbbec_main_path, close_fds=False
+            # cmd4orbbec = subprocess.Popen(orbbec_cmd.split(), cwd=cwd, shell=False, stdin=subprocess.PIPE,
+            #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+            # cmd4orbbec = subprocess.Popen(orbbec_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+            #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # , check=True)
+            # orbbec_cmd2 = 'python2 ' + orbbec_main_path2 + 'orbbec_opencv_v4.py --filename ' + filename + \
+            #               ' --duration ' + values['duration']
+            # cmd4orbbec = subprocess.Popen(orbbec_cmd2, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+            #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # cmd4orbbec.wait()
+            print('orbbec recording ...')
+            # cmd4orbbec.wait()
+            # output = cmd4orbbec.stderr.read()
+            # print(output)
+            # time.sleep(1)
 
         if values['77_front_check']:
             '''json_file = cwd + '/cf.json'
