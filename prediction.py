@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import load_model
@@ -7,6 +8,34 @@ from PIL import Image, ImageOps
 import numpy as np
 import warnings
 import glob
+from matplotlib import pyplot as plt
+from IPython.display import clear_output
+
+
+class PlotLosses(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.i = 0
+        self.x = []
+        self.losses = []
+        self.val_losses = []
+
+        self.fig = plt.figure()
+
+        self.logs = []
+
+    def on_epoch_end(self, epoch, logs={}):
+        self.logs.append(logs)
+        self.x.append(self.i)
+        self.losses.append(logs.get('loss'))
+        self.val_losses.append(logs.get('val_loss'))
+        self.i += 1
+        print('epoch:', epoch)
+        clear_output(wait=True)
+        plt.plot(self.x, self.losses, label="loss")
+        plt.plot(self.x, self.val_losses, label="val_loss")
+        plt.legend()
+        plt.draw()
+        plt.show()
 
 
 def preprocess(im_data_path, custom_class, size, is_split=True):
@@ -36,7 +65,7 @@ def preprocess(im_data_path, custom_class, size, is_split=True):
     if is_split:
         from sklearn.model_selection import train_test_split
         x_train, x_test, y_train, y_test = train_test_split(x, keras.utils.to_categorical(y),
-                                                            test_size=0.2, random_state=1)
+                                                            test_size=0.5, random_state=1)
         return [x_train, x_test, y_train, y_test]
     else:
         # shuffle
@@ -78,10 +107,23 @@ def CNN_train(data, is_split, num_layers, lr, verbose, num_epochs, model_name):
     O = Dense(y_train.shape[-1], activation='softmax')(x)
 
     model = keras.Model(inputs=I, outputs=O)
-    model.compile(optimizer=opt, loss='categorical_crossentropy')
+    model.compile(optimizer=opt, loss='categorical_crossentropy', metrics='accuracy')
+
+    # if using pycharm, disable scientific view
+    # import matplotlib
+    # matplotlib.use('ipympl')
+    # matplotlib.use(matplotlib.get_backend())
+    # import PyQt6
+    # matplotlib.use('TkAgg')
+    # matplotlib.pyplot.show()
+
     if is_split:
+        # history = model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size=8, verbose=verbose,
+        #                     epochs=num_epochs, callbacks=[PlotLossesKerasTF()])
+        # history = model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size=8, verbose=verbose,
+        #                     epochs=num_epochs, callbacks=[PlotLosses()])
         history = model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size=8, verbose=verbose,
-                            epochs=num_epochs, callbacks=[PlotLossesKerasTF()])
+                            epochs=num_epochs)
     else:
         history = model.fit(x_train, y_train, batch_size=8, verbose=verbose,
                             epochs=num_epochs, callbacks=[PlotLossesKerasTF()])
@@ -90,7 +132,7 @@ def CNN_train(data, is_split, num_layers, lr, verbose, num_epochs, model_name):
     return model, history
 
 
-def prediction(model_path, size):
+def prediction(model_path, filename, size):
     warnings.filterwarnings("ignore")
 
     # Load the model
@@ -99,9 +141,9 @@ def prediction(model_path, size):
     # Create the array of the right shape to feed into the keras model
     # The 'length' or number of images you can put into the array is
     # determined by the first position in the shape tuple, in this case 1.
-    data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+    data = np.ndarray(shape=(1, size[0], size[1], 3), dtype=np.float32)
     # Replace this with the path to your image
-    image = Image.open('data/raw_data_Raw_0_py.png')
+    image = Image.open(filename)
 
     # resize the image to a 224x224 with the same strategy as in TM2:
     # resizing the image to be at least 224x224 and then cropping from the center
