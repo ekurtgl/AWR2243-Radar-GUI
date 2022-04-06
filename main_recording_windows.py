@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import subprocess
 import time
 import sys
@@ -13,9 +14,10 @@ from datetime import datetime
 from pynput.keyboard import Key, Controller
 
 # custom parameters/paths depending on the local computer
-data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
-# data_path = 'D:\\Gallaudet_data\\'
+# data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
+data_path = 'D:\\Gallaudet_data\\'
 kinect_path = 'C:\\Users\\emrek\\Desktop\\Technical\\ffmpeg\\bin\\ffmpeg.exe -f dshow -rtbufsize 2048M -i video="Kinect V2 Video Sensor"'
+kinect_path_xef = '"C:\\Program Files\\Microsoft SDKs\\Kinect\\v2.0_1409\\Tools\\KinectStudio\\KSUtil.exe"'
 sudo_password = '190396'
 cwd = data_path
 radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_receive_test/' \
@@ -25,6 +27,8 @@ leap_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\main_leap_exe\\d
 orbbec_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\orbbec_main_exe\\dist\\orbbec_opencv_v4\\orbbec_opencv_v4.exe'
 orbbec_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\'
 webcam_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\webcam_record_exe\\dist\\webcam_record\\\webcam_record.exe'
+kinectron_main_path = 'C:\\Kinect-server-0.3.7\\kinectron-server.exe'
+kinectron_save_path = 'C:\\Users\\emrek\\kinectron-recordings\\'
 
 radar_fps = 25
 
@@ -60,7 +64,8 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.Checkbox('Orbbec', default=False, key="orbbec_check", size=(6, 10), font=('courier', 12)),
            sg.Checkbox('Leap Motion', default=False, key="leap_motion_check", size=(11, 10), font=('courier', 12)),
            sg.Checkbox('Kinect', default=False, key="kinect_check", size=(6, 10), font=('courier', 12)),
-           sg.Checkbox('Webcam', default=False, key="webcam_check", size=(6, 10), font=('courier', 12))],
+           sg.Checkbox('Webcam', default=False, key="webcam_check", size=(6, 10), font=('courier', 12)),
+           sg.Checkbox('Kinectron', default=False, key="kinectron_check", size=(9, 10), font=('courier', 12))],
           [sg.Text('Subject:', size=(8, 2), font=('courier', 12)),
            sg.InputText(size=(10, 5), key='subject', font=('courier', 12)),
            sg.VSep(),
@@ -75,7 +80,7 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.InputText(size=(10, 5), key='duration', font=('courier', 12))],
           [sg.Image('data/md.png', key='-IMAGE-', size=(500, 300)),
            sg.VSep(),
-           sg.Text('  TIME:', size=(150, 10), key='time', font=('courier', 20))],
+           sg.Text('  TIME:', size=(150, 15), key='time', font=('courier', 20))],
           # [sg.Button('Setup Radar', button_color=('white', 'black'), size=(18, 2), font=('courier', 12)),
           #  sg.Text('', key='setup_text', font=('courier', 12)),
           #  sg.Button('Setup Leap Motion', button_color=('white', 'black'), size=(18, 2), font=('courier', 12))]],
@@ -89,7 +94,7 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.VSep(),
            sg.Exit(button_color=('white', 'black'), size=(18, 2), font=('courier', 12))]]
 
-window = sg.Window('Radar GUI', size=(1200, 600)).Layout(layout)
+window = sg.Window('Radar GUI', size=(1300, 800)).Layout(layout)
 
 while True:  # Event Loop
     event, values = window.Read()
@@ -160,16 +165,30 @@ while True:  # Event Loop
         # filename = os.path.join(r'C:\Users', data_path) + fname
         filename = data_path + fname
 
+        # first open mmwave studio, then kinectron, then gui
         if values['kinect_check']:
-            kinect_cmd = kinect_path + ' -t ' + values['duration'] + ' "' + filename + '.mp4"'
-            print(kinect_cmd)
-            # cmd4kinect = subprocess.Popen('start ' + kinect_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
-            #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            os.popen(kinect_cmd)
+            # kinect_cmd = kinect_path + ' -t ' + values['duration'] + ' "' + filename + '.mp4"'
+            # os.popen(kinect_cmd)
+            kinect_cmd2 = kinect_path_xef + ' /record ' + filename + '.xef ' + values['duration'] +\
+                          ' "/stream color depth ir body"'
+            print(kinect_cmd2)
+            cmd4kinect = subprocess.Popen(kinect_cmd2, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             # cmd4kinect.wait()
             # print(cmd4kinect.stderr.read())
             print('kinect recording ...')
-            time.sleep(2.5)
+            if not values['kinectron_check']:
+                time.sleep(2.5)
+
+        if values['kinectron_check']:
+            # highlight start button in start recording
+            keyboard.press(Key.alt_l)
+            keyboard.press(Key.tab)
+            keyboard.release(Key.tab)
+            keyboard.release(Key.alt_l)
+            time.sleep(0.1)
+            keyboard.press(Key.space)
+            keyboard.release(Key.space)
 
         if values['orbbec_check']:
             orbbec_cmd = orbbec_main_path + ' --filename ' + filename + ' --duration ' + values['duration']
@@ -231,7 +250,7 @@ while True:  # Event Loop
             print('start stdout: ', cmd.stdout.read())'''
 
             # go to mmwave studio and type the filename (highlight it beforehand)
-            num_nonradar_sensors = 0  # values['kinect_check'] --> uncomment if you use subprocess for kinect or orbbec
+            num_nonradar_sensors = values['kinectron_check']  # values['kinect_check'] --> uncomment if you use subprocess for kinect or orbbec
             print('num_nonradar_sensors:', num_nonradar_sensors)
             keyboard.press(Key.alt_l)
             for i in range(num_nonradar_sensors + 1):
@@ -282,11 +301,64 @@ while True:  # Event Loop
             time.sleep(1)
             left_time -= 1
 
+        # stop recording of kinectron
+        if values['kinectron_check']:
+            if values['leap_motion_check']:
+                keyboard.press(Key.alt_l)
+                keyboard.press(Key.tab)
+                keyboard.release(Key.tab)
+                keyboard.release(Key.alt_l)
+                time.sleep(0.1)
+            if values['77_front_check']:
+                keyboard.press(Key.alt_l)
+                keyboard.press(Key.tab)
+                keyboard.release(Key.tab)
+                keyboard.release(Key.alt_l)
+                time.sleep(0.1)
+
+            # 1 for stopping, 5 for filename approval
+            keyboard.press(Key.space)
+            keyboard.release(Key.space)
+            time.sleep(1)
+            for i in range(5):
+                keyboard.press(Key.space)
+                keyboard.release(Key.space)
+                time.sleep(0.5)
+
+            # find kinectron files
+            kinectron_files = []
+            extensions = ['*.webm', '*.json']
+            for e in extensions:
+                temp_files = glob.glob(kinectron_save_path + e)
+                print(temp_files)
+                if isinstance(temp_files, list):
+                    for t in temp_files:
+                        kinectron_files.append(t)
+                else:  # if single file
+                    kinectron_files.append(temp_files)
+
+            # move files to the saving location
+            for f in kinectron_files:
+                print(f)
+                idx = [pos for pos, char in enumerate(f) if char == '\\']
+                dst = filename + '_' + f[idx[-1] + 1:]
+                print(dst)
+                shutil.move(f, dst)
+                # os.remove(f)
+                # os.replace(f, dst)
+
         # go back to gui
-        if values['77_front_check']:
-            time.sleep(3)
+        if values['77_front_check'] or values['kinectron_check']:
+            if values['leap_motion_check']:
+                time.sleep(3)
+            else:
+                time.sleep(0.1)
             keyboard.press(Key.alt_l)
             keyboard.press(Key.tab)
+            if values['77_front_check'] and values['kinectron_check']:
+                keyboard.release(Key.tab)
+                time.sleep(0.1)
+                keyboard.press(Key.tab)
             keyboard.release(Key.tab)
             keyboard.release(Key.alt_l)
 
@@ -304,9 +376,14 @@ while True:  # Event Loop
         print(search_path)
         cnt = 1
         for file in glob.glob(filename + '*'):
-            saved_files += str(cnt) + '. ' + file[idx[-1]+1:] + '  -->  ' + str(round(os.path.getsize(file)/1e6, 1)) + \
-                           ' mb' + '\n'
-            # print(file)
+
+            if round(os.path.getsize(file)/1e6, 1) > 1:
+                saved_files += str(cnt) + '. ' + file[idx[-1]+1:] + '  -->  ' + str(round(os.path.getsize(file)/1e6, 1)) + \
+                               ' mb' + '\n'
+            else:
+                saved_files += str(cnt) + '. ' + file[idx[-1] + 1:] + '  -->  ' + str(
+                    round(os.path.getsize(file) / 1e3, 1)) + \
+                               ' kb' + '\n'
             cnt += 1
         window['time'].update(saved_files, font=10)
         window.refresh()
