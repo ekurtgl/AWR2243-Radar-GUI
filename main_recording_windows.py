@@ -13,8 +13,8 @@ from datetime import datetime
 from pynput.keyboard import Key, Controller
 
 # custom parameters/paths depending on the local computer
-# data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
-data_path = 'D:\\Gallaudet_data\\'
+data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
+# data_path = 'D:\\Gallaudet_data\\'
 kinect_path = 'C:\\Users\\emrek\\Desktop\\Technical\\ffmpeg\\bin\\ffmpeg.exe -f dshow -rtbufsize 2048M -i video="Kinect V2 Video Sensor"'
 sudo_password = '190396'
 cwd = data_path
@@ -24,6 +24,7 @@ leap_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\'
 leap_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\main_leap_exe\\dist\\main_leap\\main_leap.exe'
 orbbec_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\orbbec_main_exe\\dist\\orbbec_opencv_v4\\orbbec_opencv_v4.exe'
 orbbec_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\'
+webcam_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\webcam_record_exe\\dist\\webcam_record\\\webcam_record.exe'
 
 radar_fps = 25
 
@@ -55,10 +56,11 @@ sg.theme("DarkTeal2")
 
 layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
           [sg.Text('Sensors List:', size=(15, 2), font=('courier', 12)),
-           sg.Checkbox('77 Front', default=False, key="77_front_check", size=(10, 10), font=('courier', 12)),
-           sg.Checkbox('Orbbec', default=False, key="orbbec_check", size=(10, 10), font=('courier', 12)),
-           sg.Checkbox('Leap Motion', default=False, key="leap_motion_check", size=(15, 10), font=('courier', 12)),
-           sg.Checkbox('Kinect', default=False, key="kinect_check", size=(10, 10), font=('courier', 12))],
+           sg.Checkbox('77 Front', default=False, key="77_front_check", size=(8, 10), font=('courier', 12)),
+           sg.Checkbox('Orbbec', default=False, key="orbbec_check", size=(6, 10), font=('courier', 12)),
+           sg.Checkbox('Leap Motion', default=False, key="leap_motion_check", size=(11, 10), font=('courier', 12)),
+           sg.Checkbox('Kinect', default=False, key="kinect_check", size=(6, 10), font=('courier', 12)),
+           sg.Checkbox('Webcam', default=False, key="webcam_check", size=(6, 10), font=('courier', 12))],
           [sg.Text('Subject:', size=(8, 2), font=('courier', 12)),
            sg.InputText(size=(10, 5), key='subject', font=('courier', 12)),
            sg.VSep(),
@@ -193,6 +195,15 @@ while True:  # Event Loop
             # output = cmd4orbbec.stderr.read()
             # print(output)
             # time.sleep(1)
+
+        if values['webcam_check']:
+            webcam_cmd = webcam_main_path + ' --filename ' + filename + ' --duration ' + values['duration']
+            print(webcam_cmd)
+            # cmd4webcam = subprocess.Popen('start ' + webcam_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+            #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            cmd4webcam = subprocess.Popen(webcam_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print('webcam recording ...')
 
         if values['77_front_check']:
             '''json_file = cwd + '/cf.json'
