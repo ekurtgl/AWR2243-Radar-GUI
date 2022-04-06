@@ -1,0 +1,26 @@
+# leap
+python2 C:\\Users\\emrek\\PycharmProjects\\RadarGui\\main_leap.py --filename C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\frame.data --duration 1
+
+python2 C:\\Users\\emrek\\PycharmProjects\\RadarGui\\leap\\main_read_data.py
+
+C:\Program Files (x86)\Leap Motion\Core Services\Drivers
+
+net stop LeapService
+net start LeapService
+
+# orbbec
+python2 C:\\Users\\emrek\\PycharmProjects\\RadarGui\\orbbec_opencv_v4.py --filename C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\frame --duration 3
+
+C:\\Users\\emrek\\PycharmProjects\\RadarGui\\orbbec_main_exe\\dist\\orbbec_opencv_v4\\orbbec_opencv_v4.exe --filename C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\frame --duration 3
+
+# kinect
+"C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Tools\KinectStudio\KSUtil.exe" /record "C:\\Users\\emrek\\Desktop\\tryxef.xef" 2 "/stream color depth ir body 1> camlog2.txt 2>&1"
+
+# webcam
+# in anaconda shell
+python C:\\Users\\emrek\\PycharmProjects\\RadarGui\\webcam_record.py --filename C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\webcam --duration 5
+
+C:\\Users\\emrek\\PycharmProjects\\RadarGui\\webcam_record_exe\\dist\\webcam_record\\\webcam_record.exe --filename C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\webcam --duration 3
+
+# pip
+python2 -m pip install matplotlib
