@@ -29,6 +29,7 @@ orbbec_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\'
 webcam_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\webcam_record_exe\\dist\\webcam_record\\\webcam_record.exe'
 kinectron_main_path = 'C:\\Kinect-server-0.3.7\\kinectron-server.exe'
 kinectron_save_path = 'C:\\Users\\emrek\\kinectron-recordings\\'
+lidar_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\lidar_record_exe\\dist\\lidar_record_v2\\lidar_record_v2.exe'
 
 radar_fps = 25
 
@@ -65,7 +66,8 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.Checkbox('Leap Motion', default=False, key="leap_motion_check", size=(11, 10), font=('courier', 12)),
            sg.Checkbox('Kinect', default=False, key="kinect_check", size=(6, 10), font=('courier', 12)),
            sg.Checkbox('Webcam', default=False, key="webcam_check", size=(6, 10), font=('courier', 12)),
-           sg.Checkbox('Kinectron', default=False, key="kinectron_check", size=(9, 10), font=('courier', 12))],
+           sg.Checkbox('Kinectron', default=False, key="kinectron_check", size=(9, 10), font=('courier', 12)),
+           sg.Checkbox('Lidar', default=False, key="lidar_check", size=(5, 10), font=('courier', 12))],
           [sg.Text('Subject:', size=(8, 2), font=('courier', 12)),
            sg.InputText(size=(10, 5), key='subject', font=('courier', 12)),
            sg.VSep(),
@@ -179,6 +181,13 @@ while True:  # Event Loop
             print('kinect recording ...')
             if not values['kinectron_check']:
                 time.sleep(2.5)
+
+        if values['lidar_check']:
+            lidar_cmd = lidar_path + ' --filename ' + filename + ' --duration ' + values['duration']
+            print(lidar_cmd)
+            cmd4webcam = subprocess.Popen(lidar_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print('lidar recording ...')
 
         if values['kinectron_check']:
             # highlight start button in start recording
@@ -352,7 +361,7 @@ while True:  # Event Loop
             if values['leap_motion_check']:
                 time.sleep(3)
             else:
-                time.sleep(0.1)
+                time.sleep(0.5)
             keyboard.press(Key.alt_l)
             keyboard.press(Key.tab)
             if values['77_front_check'] and values['kinectron_check']:
