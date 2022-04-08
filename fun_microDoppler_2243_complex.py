@@ -23,6 +23,19 @@ def microDoppler(fname):
     prf = 1 / dT
     isReal = 0
     duration = numChirps * dT
+    c = 299792458
+    slope = 80e12
+    fstart = 77e9
+    sampleFreq = 5.8e6
+    Bw = 4e9
+    fstop = fstart + Bw
+    fc = (fstart + fstop) / 2
+    lamda = c / fc
+    Rmax = sampleFreq * c / (2 * slope)
+    idletime = 100e-6
+    rampEndTime = 50e-6
+    Tc = idletime + rampEndTime
+    velmax = lamda / (Tc * 4)
 
     # zero pad
     zerostopad = int(NTS * numChirps * numRX * 2 - len(data))
@@ -66,7 +79,7 @@ def microDoppler(fname):
         from matplotlib import colors
         import matplotlib.pyplot as plt
 
-        fig = plt.figure(frameon=True)
+        fig = plt.figure(frameon=False)
         ax = plt.Axes(fig, [0., 0., 1., 1.])
         savename = fname[:-4] + '_py.png'
 
@@ -86,12 +99,19 @@ def microDoppler(fname):
 
         # gcf (with axes)
         im = plt.imshow(20 * np.log10((abs(sx2) / maxval)), cmap='jet', norm=norm, aspect="auto",
-                   extent=[0, duration, -prf / 2, prf / 2])
-        plt.xlabel('Time (sec)')
-        plt.ylabel('Frequency (Hz)')
+                        extent=[0, duration, -velmax, velmax])
+        font_size = 20
+        ax.xaxis.set_tick_params(labelsize=font_size)
+        ax.yaxis.set_tick_params(labelsize=font_size)
+        plt.xlabel('Time (sec)', fontsize=font_size)
+        plt.ylabel('Velocity(m/s)', fontsize=font_size)
+        plt.xticks(fontsize=font_size)
+        plt.yticks(fontsize=font_size)
         # plt.ylim([-prf/6, prf/6])
-        plt.title('Radar Micro-Doppler Spectrogram')
-        fig.savefig(savename, transparent=False, dpi=200)
+        plt.title('Radar Image', fontsize=font_size)
+        cb = plt.colorbar()
+        fig.savefig(savename, transparent=False, dpi=200, bbox_inches='tight')
+        cb.remove()
         # ax.set_axis_off()
         # fig.add_axes(ax)
         # ax.imshow(your_image, aspect='auto')
@@ -104,9 +124,10 @@ def microDoppler(fname):
         im.get_figure().gca().set_title("")
         extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
 
-        plt.savefig(savename.replace('.', '_im.'), bbox_inches='tight', transparent=True, pad_inches=0)
+        plt.savefig(savename.replace('.', '_im.'), bbox_inches='tight', transparent=False, pad_inches=0)
 
         # plt.imsave(savename.replace('.', '_im.'), ax.get_images())
-
         # frame = plt.gcf()
+        # fig.set_visible(False)
+        plt.close(fig)
 
