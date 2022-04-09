@@ -1,0 +1,29 @@
+0 Test
+1 Water - Eat
+2 Oh I see - Work
+3 Book - Thank you
+4 Car - Ok
+5 This - Friend
+6 More - What
+7 Today - Coffee
+8 Time - Father
+9 Drink - My
+10 Hot - Where
+11 Shop - Bring
+12 Pet - Have
+13 Should - Morning
+14 Fine - Gas
+15 Wrong - Teacher
+16 Go ahead - Maybe
+17 Kitchen - Money
+18 Night - People
+19 Table - Thrilled
+20 Explanation - Long
+21 Knife - Hospital
+22 Health - Write
+23 Sting - Catch up
+24 Stop - Die
+25 Disappear - Send
+26 Arrive - Shave
+27 Follow - Smell
+28 Hate - Shut

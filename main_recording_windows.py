@@ -47,7 +47,7 @@ record_cmd = './DCA1000EVM_CLI_Control record cf.json'.split()
 start_cmd = './DCA1000EVM_CLI_Control start_record cf.json'.split()
 stop_cmd = './DCA1000EVM_CLI_Control stop_record cf.json'.split()
 
-class_fname = 'classes.txt'
+class_fname = 'motions_140_sign_5_set.txt'
 with open(class_fname) as f:
     # lines = f.readlines()  # ignore \n
     lines = f.read().splitlines()
@@ -72,7 +72,7 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', 20))],
            sg.InputText(size=(10, 5), key='subject', font=('courier', 12)),
            sg.VSep(),
            sg.Text('Class:', size=(7, 2), font=('courier', 12)),
-           sg.Combo(values=lines, default_value='TEST', key='class_list', size=(10, 10), font=('courier', 12)),
+           sg.Combo(values=lines, default_value='TEST', key='class_list', size=(30, 10), font=('courier', 12)),
            sg.VSep(),
            sg.Text('Experiment:', size=(11, 2), font=('courier', 12)),
            sg.Combo(values=['0', '1', '2', '3', '4'], default_value='0', key='exp_list', size=(5, 12),
@@ -323,7 +323,7 @@ while True:  # Event Loop
                 keyboard.press(Key.tab)
                 keyboard.release(Key.tab)
                 keyboard.release(Key.alt_l)
-                time.sleep(0.1)
+                time.sleep(0.3)
 
             # 1 for stopping, 5 for filename approval
             keyboard.press(Key.space)
