@@ -1,0 +1,34 @@
+{
+  "createdByVersion": "3.0.0.14",
+  "createdOn": "2022-03-06T21:42:47.1470932-06:00",
+  "configUsed": "C:\\Users\\emrek\\Desktop\\Technical\\77ghz\\mmwave_BPM_TDM_config.mmwave.json",
+  "captureHardware": "DCA1000",
+  "DCA1000Config": {
+    "dataLoggingMode": "raw",
+    "dataTransferMode": "LVDSCapture",
+    "dataCaptureMode": "ethernetStream",
+    "packetSequenceEnable": 1,
+    "packetDelay_us": 25
+  },
+  "mmWaveDevice": "awr2243",
+  "operatingFreq": 77,
+  "mmWaveDeviceConfig": {
+    "RS232COMPort": "COM14",
+    "RS232BaudRate": "115200",
+    "radarSSFirmware": "C:\\ti\\mmwave_studio_03_00_00_14\\mmWaveStudio\\Scripts\\..\\..\\rf_eval_firmware\\AWR2243_ES1_1\\radarss\\xwr22xx_radarss.bin",
+    "masterSSFirmware": "C:\\ti\\mmwave_studio_03_00_00_14\\mmWaveStudio\\Scripts\\..\\..\\rf_eval_firmware\\AWR2243_ES1_1\\masterss\\xwr22xx_masterss.bin"
+  },
+  "capturedFiles": {
+    "numFilesCollected": 1,
+    "fileBasePath": "C:\\Users\\emrek\\Desktop\\Technical\\77ghz\\data",
+    "files": [
+      {
+        "rawFileName": "ASL_bpm_tdm_Raw_0.bin",
+        "processedFileName": "ASL_bpm_tdm.bin",
+        "processedFileSummary": {
+          "numZeroFillBytes": 0
+        }
+      }
+    ]
+  }
+}
