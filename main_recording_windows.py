@@ -47,7 +47,9 @@ record_cmd = './DCA1000EVM_CLI_Control record cf.json'.split()
 start_cmd = './DCA1000EVM_CLI_Control start_record cf.json'.split()
 stop_cmd = './DCA1000EVM_CLI_Control stop_record cf.json'.split()
 
-class_fname = 'motions_140_sign_5_set.txt'
+class_fname = 'presentations\\motions_140_sign_5_set_v2.txt'
+# class_fname = 'presentations\\motions_sequential_v2.txt'
+# class_fname = 'presentations\\motions_sentences.txt'
 with open(class_fname) as f:
     # lines = f.readlines()  # ignore \n
     lines = f.read().splitlines()
@@ -179,8 +181,8 @@ while True:  # Event Loop
             # cmd4kinect.wait()
             # print(cmd4kinect.stderr.read())
             print('kinect recording ...')
-            if not values['kinectron_check']:
-                time.sleep(2.5)
+            # if not values['kinectron_check']:
+            #     time.sleep(2.5)
 
         if values['lidar_check']:
             lidar_cmd = lidar_path + ' --filename ' + filename + ' --duration ' + values['duration']
