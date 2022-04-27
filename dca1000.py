@@ -42,19 +42,17 @@ class CMD(Enum):
 CONFIG_HEADER = '5aa5'
 CONFIG_STATUS = '0000'
 CONFIG_FOOTER = 'aaee'
-ADC_PARAMS = {'chirps': 255,  # 32
+ADC_PARAMS = {'chirps': 3*88,  # 32
               'rx': 4,
-              'tx': 1,
               'samples': 256,
               'IQ': 2,
-              'bytes': 2,
-              'complex': 2}
+              'bytes': 2}
 # STATIC
 MAX_PACKET_SIZE = 4096
 BYTES_IN_PACKET = 1456
 # DYNAMIC
-BYTES_IN_FRAME = (ADC_PARAMS['chirps'] * ADC_PARAMS['rx'] * ADC_PARAMS['tx'] *
-                  ADC_PARAMS['IQ'] * ADC_PARAMS['samples'] * ADC_PARAMS['bytes'] * ADC_PARAMS['complex'])
+BYTES_IN_FRAME = (ADC_PARAMS['chirps'] * ADC_PARAMS['rx'] *
+                  ADC_PARAMS['IQ'] * ADC_PARAMS['samples'] * ADC_PARAMS['bytes'])
 BYTES_IN_FRAME_CLIPPED = (BYTES_IN_FRAME // BYTES_IN_PACKET) * BYTES_IN_PACKET
 PACKETS_IN_FRAME = BYTES_IN_FRAME / BYTES_IN_PACKET
 PACKETS_IN_FRAME_CLIPPED = BYTES_IN_FRAME // BYTES_IN_PACKET
