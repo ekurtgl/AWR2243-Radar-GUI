@@ -191,6 +191,7 @@ frameCount=0;
 loopCount=88;
 periodicity=8000000;
 triggerDelay=0;
+numAdcSamples=512;
 triggerSelect=1;
 #END
 
