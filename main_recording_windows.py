@@ -14,8 +14,8 @@ from datetime import datetime
 from pynput.keyboard import Key, Controller
 
 # custom parameters/paths depending on the local computer
-# data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
-data_path = 'D:\\Gallaudet_data\\'
+data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
+# data_path = 'D:\\Gallaudet_data\\'
 kinect_path = 'C:\\Users\\emrek\\Desktop\\Technical\\ffmpeg\\bin\\ffmpeg.exe -f dshow -rtbufsize 2048M -i video="Kinect V2 Video Sensor"'
 kinect_path_xef = '"C:\\Program Files\\Microsoft SDKs\\Kinect\\v2.0_1409\\Tools\\KinectStudio\\KSUtil.exe"'
 sudo_password = '190396'
@@ -48,16 +48,11 @@ start_cmd = './DCA1000EVM_CLI_Control start_record cf.json'.split()
 stop_cmd = './DCA1000EVM_CLI_Control stop_record cf.json'.split()
 
 class_fname = 'presentations\\motions_140_sign_5_set_v2.txt'
-# class_fname = 'presentations\\motions_sequential_v2.txt'
+class_fname = 'presentations\\motions_sequential_v2.txt'
 # class_fname = 'presentations\\motions_sentences.txt'
 with open(class_fname) as f:
     # lines = f.readlines()  # ignore \n
     lines = f.read().splitlines()
-
-
-def time_as_int():
-    return int(round(time.time() * 100))
-
 
 sg.theme("DarkTeal2")
 
@@ -174,7 +169,9 @@ while True:  # Event Loop
             # kinect_cmd = kinect_path + ' -t ' + values['duration'] + ' "' + filename + '.mp4"'
             # os.popen(kinect_cmd)
             kinect_cmd2 = kinect_path_xef + ' /record ' + filename + '.xef ' + values['duration'] +\
-                          ' "/stream color depth ir body"'
+                          ' -stream color depth ir body'
+            #' "/stream color depth ir body"'
+            #1> camlog2.txt 2>&1
             print(kinect_cmd2)
             cmd4kinect = subprocess.Popen(kinect_cmd2, cwd=cwd, shell=True, stdin=subprocess.PIPE,
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
