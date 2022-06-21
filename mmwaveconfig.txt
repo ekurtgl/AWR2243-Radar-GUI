@@ -44,6 +44,11 @@ crcType=1;
 ackTimeout=50000;
 #END
 
+## Custom for TDM
+#waveformType = "legacyFrameChirp";
+#MIMOScheme = "TDM";
+#END
+
 #
 #channel config parameters, please modify if needed.
 #rlChanCfg_t
@@ -77,84 +82,9 @@ chInterleave=0;
 #rlLowPowerModeCfg_t
 #
 anaCfg=0;
-lpAdcMode=1;
+lpAdcMode=0;
 #END
 
-# **** CUSTOM ****
-
-freqLimitLow = 760
-freqLimitLow = 810
-RFLdoByPass = 0
-PerChirpPhaseShiftEna = 0
-
-dataPathCfgPath = 1
-dataCfgFmt1 = 0
-pkt0VChannelNo = 0
-pkt1VChannelNo = 0
-dataCfgFmt0 = 0
-
-lane4En = 0
-lane2En = 1
-lane3En = 0
-lane1En = 1
-lvdsPacketEndPulse = 0
-lvdsCrcEn = 0
-laneFormat = 0
-lvdsMsbFirst = 1
-
-clockPol = 0
-lane0Pol = 0
-lane2Pos = 4
-lane2Pol = 0
-lane0Pos = 1
-lane1Pos = 2
-lane1Pol = 0
-lane3Pos = 5
-lane3Pol = 0
-clockPos = 3
-
-obj2PosY = 327
-obj1AntPosRx1X = 0
-obj2Sig = -95
-obj1VelY = 0
-obj2VelZ = 0
-obj1PosZ = 0
-obj1PosY = 3
-obj2PosZ = 0
-obj1BMaxZ = 327
-obj1BMaxX = 327
-obj1BMaxY = 327
-obj1AntPosRx4Z = 0
-obj1AntPosRx3Z = 0
-obj1AntPosRx2Z = 0
-obj1AntPosRx1Z = 0
-obj1VelX = 0
-obj1AntPosRx3X = 1
-obj1PosX = 4
-obj2BMaxZ = 327
-obj2BMaxX = 327
-obj2BMaxY = 327
-obj1BMinZ = -327.6
-obj1BMinX = -327.6
-obj1BMinY = 0
-obj1AntPosTx2X = 0
-obj1AntPosTx3X = 0
-obj1Sig = -2.5
-obj1AntPosTx1X = 0
-obj1VelZ = 0
-obj2VelX = 0
-obj2BMinZ = -327
-obj2BMinX = -327
-obj2BMinY = 0
-obj2PosX = 327
-obj1AntPosTx2Z = 0
-obj1AntPosTx3Z = 0
-obj2VelY = 0
-obj1AntPosTx1Z = 0
-obj1AntPosTx4X = 1.5
-obj1AntPosTx2X = 0.5
-
-# END
 
 
 #
@@ -164,10 +94,10 @@ obj1AntPosTx2X = 0.5
 intfSel=1;
 transferFmtPkt0=1;
 transferFmtPkt1=0;
-cqConfig=2;
-cq0TransSize=64;
-cq1TransSize=64;
-cq2TransSize=64;
+cqConfig=0;
+cq0TransSize=0;
+cq1TransSize=0;
+cq2TransSize=0;
 #END
 
 #
@@ -189,8 +119,8 @@ hsiClk=9
 #LANE config parameters, please modify if needed.
 #rlDevLaneEnable_t
 #
-#laneEn=15;
-laneEn=3;
+laneEn=15;
+#laneEn=3;
 #END
 
 #
@@ -201,15 +131,6 @@ laneFmtMap=0;
 laneParamCfg=1;
 #END
 
-#
-#Programmable Filter config parameters, please modify if needed.
-#rlRfProgFiltConf_t
-#
-#profileId=0;
-#coeffStartIdx=0;
-#progFiltLen=14;
-#progFiltFreqShift=100;
-#END
 
 #
 #Profile config parameters, please modify if needed.
@@ -226,7 +147,7 @@ txPhaseShifter=0;
 freqSlopeConst=1655.03515;
 txStartTime=0;
 numAdcSamples=256;
-digOutSampleRate=6250;
+digOutSampleRate=5688;
 hpfCornerFreq1=0;
 hpfCornerFreq2=0;
 rxGain=48;
@@ -240,6 +161,7 @@ rfGainTarget=1,
 # numOfChirpsToConfig = the number of defined chirp configs.
 #
 numOfChirpsToConfig=1;
+
 chirpStartIdx=0;
 chirpEndIdx=0;
 profileIdCPCFG=0;
@@ -247,7 +169,7 @@ startFreqVar=0;
 freqSlopeVar=0;
 idleTimeVar=0;
 adcStartTimeVar=0;
-txEnable=3;
+txEnable=7;
 
 #END
 
@@ -261,7 +183,13 @@ frameCount=0;
 loopCount=255;
 periodicity=8000000;
 triggerDelay=0;
-numAdcSamples=256;
+numAdcSamples=512;
 triggerSelect=1;
+#END
+
+# rlBpmChirpCfg_t
+#chirpStartIdx = 1
+#chirpEndIdx = 1
+#constBpmVal = 48 # "0x30" in hex
 #END
 

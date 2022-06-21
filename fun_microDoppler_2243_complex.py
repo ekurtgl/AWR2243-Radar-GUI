@@ -11,10 +11,10 @@ def microDoppler(fname):
     save_spectrograms = True
     SweepTime = 40e-3
     NTS = 256
-    numTX = 3
-    NoC = 88
-    isBPM = True
-    isTDM = True
+    numTX = 1
+    NoC = 255
+    isBPM = False
+    isTDM = False
     NPpF = numTX * NoC
     numRX = 4
     numChirps = int(np.ceil(len(data) / 2 / NTS / numRX))
@@ -23,29 +23,19 @@ def microDoppler(fname):
     prf = 1 / dT
     isReal = 0
     duration = numChirps * dT
-    c = 299792458
-    slope = 80e12
-    fstart = 77e9
-    sampleFreq = 5.8e6
-    Bw = 4e9
-    fstop = fstart + Bw
-    fc = (fstart + fstop) / 2
-    lamda = c / fc
-    Rmax = sampleFreq * c / (2 * slope)
-    idletime = 100e-6
-    rampEndTime = 50e-6
-    Tc = idletime + rampEndTime
-    velmax = lamda / (Tc * 4)
 
     # zero pad
     zerostopad = int(NTS * numChirps * numRX * 2 - len(data))
+    print('1', data.shape)
     data = np.concatenate([data, np.zeros((zerostopad,))])
+    print('2', data.shape)
 
     # Organize data per RX
     data = data.reshape(numRX * 2, -1, order='F')
     data = data[0:4, :] + data[4:8, :] * 1j
     data = data.T
     data = data.reshape(NTS, numChirps, numRX, order='F')
+    print('3', data.shape)
 
     # if BPM and TDM enabled
     if isTDM and isBPM:
@@ -79,7 +69,7 @@ def microDoppler(fname):
         from matplotlib import colors
         import matplotlib.pyplot as plt
 
-        fig = plt.figure(frameon=False)
+        fig = plt.figure(frameon=True)
         ax = plt.Axes(fig, [0., 0., 1., 1.])
         savename = fname[:-4] + '_py.png'
 
@@ -99,24 +89,21 @@ def microDoppler(fname):
 
         # gcf (with axes)
         im = plt.imshow(20 * np.log10((abs(sx2) / maxval)), cmap='jet', norm=norm, aspect="auto",
-                        extent=[0, duration, -velmax, velmax])
-        font_size = 20
-        ax.xaxis.set_tick_params(labelsize=font_size)
-        ax.yaxis.set_tick_params(labelsize=font_size)
-        plt.xlabel('Time (sec)', fontsize=font_size)
-        plt.ylabel('Velocity(m/s)', fontsize=font_size)
-        plt.xticks(fontsize=font_size)
-        plt.yticks(fontsize=font_size)
+                   extent=[0, duration, -6400 / 2, 6400 / 2])
+        plt.xlabel('Time (sec)')
+        plt.ylabel('Frequency (Hz)')
         # plt.ylim([-prf/6, prf/6])
-        plt.title('Radar Image', fontsize=font_size)
-        cb = plt.colorbar()
-        fig.savefig(savename, transparent=False, dpi=200, bbox_inches='tight')
-        cb.remove()
+        # plt.title('Radar Micro-Doppler Spectrogram')
+        plt.title('Complex my_param CLI-openradar asl python process_complex')
+        fig.savefig(savename, transparent=True, dpi=200)
         # ax.set_axis_off()
         # fig.add_axes(ax)
         # ax.imshow(your_image, aspect='auto')
         # plt.axis('off')
         # fig.savefig(savename.replace('.', '_im.'), bbox_inches=extent)
+        plt.title('Radar Micro-Doppler Spectrogram')
+        fig.savefig(savename.replace('.', '_whiteborder.'), transparent=False, dpi=200)
+
         plt.axis('off')
         plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
                         labelright='off', labelbottom='off')
@@ -124,10 +111,11 @@ def microDoppler(fname):
         im.get_figure().gca().set_title("")
         extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
 
-        plt.savefig(savename.replace('.', '_im.'), bbox_inches='tight', transparent=False, pad_inches=0)
+        plt.savefig(savename.replace('.', '_im.'), bbox_inches='tight', transparent=True, pad_inches=0)
+
+
 
         # plt.imsave(savename.replace('.', '_im.'), ax.get_images())
+
         # frame = plt.gcf()
-        # fig.set_visible(False)
-        plt.close(fig)
 
