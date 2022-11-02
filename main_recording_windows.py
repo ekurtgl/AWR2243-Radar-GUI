@@ -14,8 +14,9 @@ from datetime import datetime
 from pynput.keyboard import Key, Controller
 
 # custom parameters/paths depending on the local computer
-data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
-# data_path = 'D:\\Gallaudet_data\\'
+# data_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
+data_path = 'D:\\ASL_fall22_native\\Chloe\\1_nov_2022\\'
+# data_path = 'C:\\Users\\emrek\\Desktop\\Technical\\Kinect\\Skeleton_processing\\sample\\'
 kinect_path = 'C:\\Users\\emrek\\Desktop\\Technical\\ffmpeg\\bin\\ffmpeg.exe -f dshow -rtbufsize 2048M -i video="Kinect V2 Video Sensor"'
 kinect_path_xef = '"C:\\Program Files\\Microsoft SDKs\\Kinect\\v2.0_1409\\Tools\\KinectStudio\\KSUtil.exe"'
 sudo_password = '190396'
@@ -27,6 +28,7 @@ leap_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\main_leap_exe\\d
 orbbec_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\orbbec_main_exe\\dist\\orbbec_opencv_v4\\orbbec_opencv_v4.exe'
 orbbec_main_path2 = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\'
 webcam_main_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\webcam_record_exe\\dist\\webcam_record\\\webcam_record.exe'
+webcam_id = '1'
 kinectron_main_path = 'C:\\Kinect-server-0.3.7\\kinectron-server.exe'
 kinectron_save_path = 'C:\\Users\\emrek\\kinectron-recordings\\'
 lidar_path = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\lidar_record_exe\\dist\\lidar_record_v2\\lidar_record_v2.exe'
@@ -47,9 +49,11 @@ record_cmd = './DCA1000EVM_CLI_Control record cf.json'.split()
 start_cmd = './DCA1000EVM_CLI_Control start_record cf.json'.split()
 stop_cmd = './DCA1000EVM_CLI_Control stop_record cf.json'.split()
 
-class_fname = 'presentations\\motions_140_sign_5_set_v2.txt'
-class_fname = 'presentations\\motions_sequential_v2.txt'
+# class_fname = 'presentations\\motions_140_sign_5_set_v2.txt'
+class_fname = 'presentations\\motions_140_sign_5_set.txt'
+# class_fname = 'presentations\\motions_sequential_v2.txt'
 # class_fname = 'presentations\\motions_sentences.txt'
+# class_fname = 'presentations\\motions_140_sign.txt'
 with open(class_fname) as f:
     # lines = f.readlines()  # ignore \n
     lines = f.read().splitlines()
@@ -170,6 +174,10 @@ while True:  # Event Loop
             # os.popen(kinect_cmd)
             kinect_cmd2 = kinect_path_xef + ' /record ' + filename + '.xef ' + values['duration'] +\
                           ' -stream color depth ir body'
+            # kinect_cmd2 = kinect_path_xef + ' /record ' + filename + '.xef ' + values['duration'] +\
+            #               ' -stream color'
+            # kinect_cmd2 = kinect_path_xef + ' /record ' + filename + '.xef ' + values['duration'] +\
+            #               ' "-stream color depth ir body"'
             #' "/stream color depth ir body"'
             #1> camlog2.txt 2>&1
             print(kinect_cmd2)
@@ -224,7 +232,9 @@ while True:  # Event Loop
             # time.sleep(1)
 
         if values['webcam_check']:
-            webcam_cmd = webcam_main_path + ' --filename ' + filename + ' --duration ' + values['duration']
+            webcam_cmd = webcam_main_path + ' --filename ' + filename + ' --duration ' + values['duration'] + \
+                         ' --cam_id ' + webcam_id
+
             print(webcam_cmd)
             # cmd4webcam = subprocess.Popen('start ' + webcam_cmd, cwd=cwd, shell=True, stdin=subprocess.PIPE,
             #                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)

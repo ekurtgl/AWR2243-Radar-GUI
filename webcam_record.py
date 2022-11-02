@@ -7,12 +7,13 @@ parser = argparse.ArgumentParser()
 # Add an argument
 parser.add_argument('--filename', type=str, required=True)
 parser.add_argument('--duration', type=int, required=True)
+parser.add_argument('--cam_id', type=int, required=True)
 
 # Parse the argument
 args = parser.parse_args()
 
 # Capture video from webcam
-vid_capture = cv2.VideoCapture(1)
+vid_capture = cv2.VideoCapture(args.cam_id)
 vid_cod = cv2.VideoWriter_fourcc(*'XVID')
 output = cv2.VideoWriter(args.filename + ".mp4", vid_cod, 30.0, (640, 480))
 
