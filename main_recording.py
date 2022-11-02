@@ -10,7 +10,6 @@ from datetime import datetime
 
 fname = 'data/raw_data_Raw_0.bin'
 sudo_password = '190396'
-main_path = '/home/emre/PycharmProjects/RadarGUI/data/'
 cwd = '/home/emre/Desktop/77ghz/CLI/Release'
 radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_receive_test/' \
              'open_radar_initiative-new_receive_test/setup_radar/build'
@@ -40,8 +39,9 @@ def time_as_int():
     return int(round(time.time() * 100))
 
 
+imsize = (500, 300)
+fontsize = 15
 sg.theme("DarkTeal2")
-fontsize = 12
 
 layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', fontsize))],
           [sg.Text('Sensors List:', size=(15, 2), font=('courier', fontsize)),
@@ -62,7 +62,7 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', fontsize
            sg.VSep(),
            sg.Text('Duration (sec):', size=(15, 2), font=('courier', fontsize)),
            sg.InputText(size=(10, 5), key='duration', font=('courier', fontsize))],
-          [sg.Image('data/md.png', key='-IMAGE-', size=(500, 300)),
+          [sg.Image('data/md.png', key='-IMAGE-', size=imsize),
            sg.VSep(),
            sg.Text('  TIME:', size=(15, 2), key='time', font=('courier', fontsize*4)),
            [sg.Button('Setup Radar', button_color=('white', 'black'), size=(18, 2), font=('courier', fontsize)),
@@ -78,7 +78,7 @@ layout = [[sg.Text('Data Recording GUI', size=(50, 2), font=('courier', fontsize
            sg.VSep(),
            sg.Exit(button_color=('white', 'black'), size=(18, 2), font=('courier', fontsize))]]
 
-window = sg.Window('Radar GUI', size=(1700, 800)).Layout(layout)
+window = sg.Window('Radar GUI').Layout(layout)
 
 while True:  # Event Loop
     event, values = window.Read()
@@ -133,7 +133,7 @@ while True:  # Event Loop
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     elif event == '1. Start Recording':
-        window['-IMAGE-'].update('data/md.png', size=(500, 300))
+        window['-IMAGE-'].update('data/md.png', size=imsize)
         window['md_text'].update('                               ')
         window['stop_text'].update('                             ')
         window['start_text'].update('Go!                            ')
@@ -143,6 +143,7 @@ while True:  # Event Loop
         print('duration: ', values['duration'])
         data_class = values['class_list'].split()[0]
         now = datetime.now()
+        main_path = '/home/emre/PycharmProjects/RadarGUI/data/'
         date_time = now.strftime("%Y_%m_%d_%H_%M_%S_")
         fname = date_time + 'subj' + values['subject'] + '_' + values['exp_list'] + '_class' + data_class
         filename = main_path + fname
@@ -234,7 +235,7 @@ while True:  # Event Loop
         window['md_text'].update('Generating Micro-Doppler Signature...')
         window.refresh()
         microDoppler('data/' + fname + '_Raw_0.bin')
-        window['-IMAGE-'].update(data=convert_to_bytes('data/' + fname + '_Raw_0_py.png', resize=(500, 300)))
+        window['-IMAGE-'].update(data=convert_to_bytes('data/' + fname + '_Raw_0_py.png', resize=(700, 500)))
         window['md_text'].update('Done!                          ')
         window.refresh()
 

@@ -61,8 +61,8 @@ class LeapMotionListener(Leap.Listener):
         print('Exited')
 
     def on_frame(self, controller):
-        if self.cnt % 50 == 0:
-            print('Frame: ' + str(self.cnt))
+        if self.cnt % 10 == 0:
+            print('Frame: ' + str(self.cnt) + ', # of Hands: ' + str(len(controller.frame().hands)))
         self.cnt += 1
         # frame = controller.frame()
         self.frames.append(controller.frame())
@@ -90,6 +90,12 @@ def main():
     listener.duration = args.duration
     controller = Leap.Controller()
     controller.add_listener(listener)
+
+    # wants data even when it is in the background
+    controller.set_policy(Leap.Controller.POLICY_BACKGROUND_FRAMES)
+    controller.set_policy(Leap.Controller.POLICY_IMAGES)
+    controller.set_policy(Leap.Controller.POLICY_OPTIMIZE_HMD)  # when head mounted
+
     begin_time = time.time()
 
     # print('Press enter to quit')

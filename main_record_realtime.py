@@ -13,14 +13,14 @@ numRxAntennas = 4
 numLoopsPerFrame = 88
 NPpF = numTxAntennas * numLoopsPerFrame
 SweepTime = 40e-3
-sampleFreq = 5.688e6
+sampleFreq = 10e6
 isTDM = True
 isBPM = True
 
 isComplex = 2  # 1 for real, 2 for complex, real is not added yet
 plot_rangedoppler = 0
 save_rd_map = 0
-rangelim = 4  # in meters
+rangelim = 4  # in meters (only for display, actual maxRange is different)
 plot_microdoppler = 1
 plot_motion = 0
 
@@ -32,7 +32,7 @@ numDopplerBins = numLoopsPerFrame
 count = 0
 if __name__ == '__main__':
     now = datetime.now()
-    main_data = '/home/emre/PycharmProjects/RadarGUI/data/'
+    main_data = 'C:\\Users\\emrek\\PycharmProjects\\RadarGui\\data\\'
     date_time = now.strftime(main_data+"%Y_%m_%d_%H_%M_%S")
     filename = str(date_time) + ".bin"
 
@@ -157,8 +157,9 @@ if __name__ == '__main__':
                 import matplotlib.pyplot as plt
 
                 data = np.array(np_raw_frame, dtype=np.int16)
+                # numChirps = int(np.ceil(len(data) / 2 / numADCSamples / numRxAntennas))
                 numChirps = int(np.ceil(len(data) / 2 / numADCSamples / numRxAntennas * numTxAntennas))
-
+                print('numChirps', numChirps)
                 # zero pad
                 zerostopad = int(numADCSamples * numChirps * numRxAntennas * 2 - len(data))
                 if zerostopad:
@@ -170,7 +171,6 @@ if __name__ == '__main__':
                 data = data[0:4, :] + data[4:8, :] * 1j
                 data = data.T
                 data = data.reshape(numADCSamples, numChirps, numRxAntennas, order='F')
-                # data = np.fft.fft(data[:, :, 0])
 
                 # if BPM and TDM enabled
                 if isTDM and isBPM:
@@ -183,7 +183,18 @@ if __name__ == '__main__':
                     chirp3 = data[:, 2::3, :]
                     data = np.concatenate([chirp1, chirp2, chirp3], -1)
 
+                if isTDM and not isBPM:
+                    prf = 1 / dT / numTxAntennas
+                    rem = -(data.shape[1] % 3)
+                    if rem:
+                        data = data[:, :rem, :]
+                    chirp1 = data[:, 0::3, :]
+                    chirp2 = data[:, 1::3, :]
+                    chirp3 = data[:, 2::3, :]
+                    data = np.concatenate([chirp1, chirp2, chirp3], -1)
 
+                # data = np.fft.fft(data[:, :, 0])
+                print('data:', data.shape)
                 if cnt == 1:
                     # params
                     rBin = np.arange(15, 18)
@@ -194,9 +205,8 @@ if __name__ == '__main__':
 
                     data_whole = np.zeros((numADCSamples, md_plot_len * NPpF * int(1/SweepTime)),
                                           dtype='complex')
-                    # print('data_whole part', data_whole[:, -numChirps//numTxAntennas:].shape)
-                    # print('data:', data[:, :, 0].shape)
                     data_whole[:, -numChirps//numTxAntennas:] = data[:, :, 0]
+                    print('data_whole part', data_whole[:, -numChirps:].shape)
                     # rp = np.fft.fftshift(np.fft.fft(data_whole), 1)
                     rp = np.fft.fft(data_whole)
                     print(rp.shape)
@@ -230,7 +240,6 @@ if __name__ == '__main__':
                         sys.exit('Figure closed, hence stopped.')
                     data_whole[:, : -numChirps//numTxAntennas] = data_whole[:, numChirps//numTxAntennas:]
                     data_whole[:, -numChirps//numTxAntennas:] = data[:, :, 0]
-
                     # rp = np.fft.fftshift(np.fft.fft(data_whole), 1)
                     rp = np.fft.fft(data_whole)
                     y2 = np.sum(rp[rBin, :], 0)
@@ -252,7 +261,7 @@ if __name__ == '__main__':
                 import matplotlib.pyplot as plt
 
                 data = np.array(np_raw_frame, dtype=np.int16)
-                numChirps = int(np.ceil(len(data) / 2 / numADCSamples / numRxAntennas))
+                numChirps = int(np.ceil(len(data) / 2 / numADCSamples / numRxAntennas * numTxAntennas))
 
                 # zero pad
                 zerostopad = int(numADCSamples * numChirps * numRxAntennas * 2 - len(data))
@@ -298,7 +307,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print('Stopped by keyboard interrupt')
     out.release()
-
 
 
 

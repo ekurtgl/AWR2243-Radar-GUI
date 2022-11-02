@@ -11,22 +11,24 @@ from fun_microDoppler_2243_complex import microDoppler
 from helpers import convert_to_bytes
 from prediction import *
 
+
 fname = 'data/raw_data_Raw_0.bin'
+pred_filename = fname.replace('.bin', '_py.png')
+# pred_filename = 'train_folder/maybe_04_py.png'
 model_path = 'keras_model.h5'
+new_model_name = 'keras_custom.h5'
+im_size_default = (224, 224)
+im_size = (128, 128)
 train_path = 'train_folder'
 sudo_password = '190396'
-cwd = '/home/emre/Desktop/77ghz/CLI/Release'
-radar_path = '/home/emre/Desktop/77ghz/open_radar/open_radar_initiative-new_receive_test/' \
-             'open_radar_initiative-new_receive_test/setup_radar/build'
+cwd = '/home/uarspl/Desktop/77ghz/CLI/CLI/Release'
+radar_path = '/home/uarspl/Desktop/77ghz/CLI/open_radar_initiative-new_receive_test/setup_radar/build'
 radar_cmd = './setup_radar'
 export_cmd = 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$pwd'
 # env = dict(os.environ)
 # env = os.environ.copy()
 # env['LD_LIBRARY_PATH'] = cwd + ':' + os.getcwd()
 os.environ["LD_LIBRARY_PATH"] = cwd  # + ':' + os.getcwd() # error code 127 when not executed
-im_size = (64, 64)
-new_model_name = 'keras_custom.h5'
-is_split = False  # whether train/test split enabled
 # print(env)
 
 # os.system("LD_LIBRARY_PATH={}".format(os.getcwd()))
@@ -57,9 +59,9 @@ spect_size = (500, 300)
 
 bcols = ['blue', 'orange', 'green']
 BAR_WIDTH = 100
-BAR_SPACING = 300
+BAR_SPACING = 200
 EDGE_OFFSET = 100
-GRAPH_SIZE = (1000, 300)
+GRAPH_SIZE = (900, 300)
 DATA_SIZE = (GRAPH_SIZE[0], 120)
 graph = sg.Graph(GRAPH_SIZE, (0, 0), DATA_SIZE, background_color='white')
 graph.erase()
@@ -83,14 +85,14 @@ layout = [[sg.Text('Radar User Interface', size=(50, 2), font=('courier', font_s
           [sg.Button('2. Stop Recording', button_color=('white', 'red'), size=(18, 2), font=('courier', font_size)),
            sg.Text('                               ', key='stop_text', font=('courier', font_size)),
            sg.VSep(),
-           sg.Button('Start Train \n Data Recording', key='train_start_record', button_color=('white', 'green'),
+           sg.Button('Start Training\nData Recording', key='train_start_record', button_color=('white', 'green'),
                      size=(18, 2), font=('courier', font_size)),
            sg.Text('', key='train_start_record_text', font=('courier', font_size))],
           [sg.Button('3. Micro-Doppler Signature', button_color=('white', 'blue'), size=(18, 2),
                      font=('courier', font_size)),
            sg.Text('                               ', key='md_text', font=('courier', font_size)),
            sg.VSep(),
-           sg.Button('Stop Train \n Data Recording', key='train_stop_record', button_color=('white', 'red'),
+           sg.Button('Stop Training\nData Recording', key='train_stop_record', button_color=('white', 'red'),
                      size=(18, 2), font=('courier', font_size)),
            sg.Text('', key='train_stop_record_text', font=('courier', font_size))],
           [sg.Button('4. Predict', button_color=('black', 'yellow'), size=(18, 2), font=('courier', font_size)),
@@ -103,7 +105,7 @@ layout = [[sg.Text('Radar User Interface', size=(50, 2), font=('courier', font_s
                     font=('courier', font_size)),
            sg.VSep(),
            sg.Text('Num. of\nEpochs:', size=(7, 2), font=('courier', font_size)),
-           sg.Combo(values=[10, 20, 50], default_value=20, key='epochs', size=(5, 12),
+           sg.Combo(values=[10, 20, 50], default_value=50, key='epochs', size=(5, 12),
                     font=('courier', font_size)),
            sg.VSep(),
            sg.Text('Num. of\nLayers:', size=(7, 2), font=('courier', font_size)),
@@ -128,7 +130,6 @@ while True:  # Event Loop
         # window['rd_text'].update('')
         window['stop_text'].update('                               ')
         window['start_text'].update('                               ')
-        window['-IMAGE-'].update('data/blank.png', size=spect_size)
 
         # std = subprocess.run(radar_cmd, cwd=radar_path, shell=True, stdin=subprocess.PIPE,  # check=True,
         #                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -226,7 +227,7 @@ while True:  # Event Loop
         window['stop_text'].update('                               ')
         window.refresh()
         microDoppler(fname)
-        window['-IMAGE-'].update(data=convert_to_bytes(fname[:-4] + '_py_whiteborder.png', resize=spect_size))
+        window['-IMAGE-'].update(data=convert_to_bytes(fname[:-4] + '_py.png', resize=spect_size))
         window['md_text'].update('Done!                          ')
         window.refresh()
 
@@ -234,8 +235,7 @@ while True:  # Event Loop
         window['pred_text'].update('Predicting...                  ')
         window['md_text'].update('                               ')
         window.refresh()
-        im_size_default = (224, 224)
-        pred = prediction(model_path, im_size_default)
+        pred = prediction(model_path, pred_filename, im_size_default)
         maybe = pred[0][0] * 100
         you = pred[0][1] * 100
 
@@ -249,16 +249,15 @@ while True:  # Event Loop
             maybe += offset
             you_offset = 0
             maybe_offset = offset
-
         graph.erase()
         graph.draw_rectangle(top_left=(0 * BAR_SPACING + EDGE_OFFSET, maybe),
                              bottom_right=(0 * BAR_SPACING + EDGE_OFFSET + BAR_WIDTH, 0), fill_color=bcols[0])
-        graph.draw_text(text='MAYBE --> ' + str(round(maybe - maybe_offset, 2))+'%',
-                        location=(0 * BAR_SPACING + EDGE_OFFSET + 120, maybe + 10), color=bcols[0], font=myfont)
         graph.draw_rectangle(top_left=(1 * BAR_SPACING + EDGE_OFFSET, you),
                              bottom_right=(1 * BAR_SPACING + EDGE_OFFSET + BAR_WIDTH, 0), fill_color=bcols[1])
+        graph.draw_text(text='MAYBE --> ' + str(round(maybe - maybe_offset, 2))+'%',
+                        location=(0 * BAR_SPACING + EDGE_OFFSET + 70, maybe + 10), color=bcols[0], font=myfont)
         graph.draw_text(text='YOU --> ' + str(round(you - you_offset, 2)) + '%',
-                        location=(1 * BAR_SPACING + EDGE_OFFSET + 120, you + 10), color=bcols[1], font=myfont)
+                        location=(1 * BAR_SPACING + EDGE_OFFSET + 70, you + 10), color=bcols[1], font=myfont)
 
         window['pred_text'].update('Predicted!                     ')
         window.refresh()
@@ -270,7 +269,8 @@ while True:  # Event Loop
         # window['rd_text'].update('')
         window['stop_text'].update('                               ')
         window['train_start_record_text'].update('Go!')
-        # window['setup_text'].update('                               ')
+        # window['setup_text'].update
+        graph.erase()
         window.refresh()
 
         cmd = subprocess.Popen(start_cmd, cwd=cwd, shell=False, stdin=subprocess.PIPE, text=True,
@@ -319,12 +319,12 @@ while True:  # Event Loop
         window['train_stop_record_text'].update('Generating Micro-Doppler Signature...')
         window.refresh()
         microDoppler(fname)
-        window['-IMAGE-'].update(data=convert_to_bytes(fname[:-4] + '_py_whiteborder.png', resize=spect_size))
+        window['-IMAGE-'].update(data=convert_to_bytes(fname[:-4] + '_py.png', resize=spect_size))
 
         # rename to move it to the data folder
         now = datetime.now()
         date_time = now.strftime("_%Y_%m_%d_%H_%M_%S_")
-        src = fname[:-4] + '_py_im.png'
+        src = fname[:-4] + '_py.png'
         dst = src.replace('data', train_path).replace('raw', values['class_name'] + date_time)
         os.rename(src, dst)
 
@@ -333,54 +333,59 @@ while True:  # Event Loop
         window['train_stop_record_text'].update('Done! Num. of files: ' + str(len(files)))
 
     elif event == 'train':
+        is_split = True  # whether train/test split enabled
         data = preprocess(train_path, values['class_name'], im_size, is_split)
         model, history = CNN_train(data, is_split, values['layers'], values['learn_rate'], 1, values['epochs'],
                                    new_model_name)
 
     elif event == 'pred_new':
+        window['pred_text'].update('                               ')
         window['pred_new_text'].update('Predicting...')
         window.refresh()
-        pred = prediction_new(new_model_name, im_size)
+        pred = prediction(new_model_name, pred_filename, im_size)
         maybe = pred[0][0] * 100
         you = pred[0][1] * 100
         custom_class = pred[0][2] * 100
 
         # add offset for visualization purposes
         offset = 3
-        if maybe > you:
+        if maybe > you and maybe > custom_class:
             you += offset
+            custom_class += offset
             you_offset = offset
+            custom_class_offset = offset
             maybe_offset = 0
-        else:
+        elif you > maybe and you > custom_class:
             maybe += offset
+            custom_class += offset
             you_offset = 0
             maybe_offset = offset
+            custom_class_offset = offset
+        elif custom_class > you and custom_class > maybe:
+            maybe += offset
+            you += offset
+            custom_class_offset = 0
+            maybe_offset = offset
+            you_offset = offset
+
         graph.erase()
         graph.draw_rectangle(top_left=(0 * BAR_SPACING + EDGE_OFFSET, maybe),
                              bottom_right=(0 * BAR_SPACING + EDGE_OFFSET + BAR_WIDTH, 0), fill_color=bcols[0])
         graph.draw_text(text='MAYBE --> ' + str(round(maybe - maybe_offset, 2)) + '%',
-                        location=(0 * BAR_SPACING + EDGE_OFFSET + 120, maybe + 10), color=bcols[0], font=myfont)
+                        location=(0 * BAR_SPACING + EDGE_OFFSET + 70, maybe + 10), color=bcols[0], font=myfont)
         graph.draw_rectangle(top_left=(1 * BAR_SPACING + EDGE_OFFSET, you),
                              bottom_right=(1 * BAR_SPACING + EDGE_OFFSET + BAR_WIDTH, 0), fill_color=bcols[1])
         graph.draw_text(text='YOU --> ' + str(round(you - you_offset, 2)) + '%',
-                        location=(1 * BAR_SPACING + EDGE_OFFSET + 120, you + 10), color=bcols[1], font=myfont)
+                        location=(1 * BAR_SPACING + EDGE_OFFSET + 70, you + 10), color=bcols[1], font=myfont)
         graph.draw_rectangle(top_left=(2 * BAR_SPACING + EDGE_OFFSET, custom_class),
                              bottom_right=(2 * BAR_SPACING + EDGE_OFFSET + BAR_WIDTH, 0), fill_color=bcols[2])
-        graph.draw_text(text=values['class_name'].upper() + ' --> ' + str(round(custom_class, 2)) + '%',
-                        location=(2 * BAR_SPACING + EDGE_OFFSET + 120, custom_class + 10), color=bcols[2], font=myfont)
+        graph.draw_text(text=values['class_name'].upper() + ' --> ' + str(round(custom_class - custom_class_offset, 2)) + '%',
+                        location=(2 * BAR_SPACING + EDGE_OFFSET + 80, custom_class + 10), color=bcols[2], font=myfont)
         window.refresh()
 
-        window['pred_text'].update('Predicted!')
+        window['pred_new_text'].update('Predicted!')
 
 window.Close()
-
-
-
-
-
-
-
-
 
 
 
