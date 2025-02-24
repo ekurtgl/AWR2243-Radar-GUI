@@ -1,3 +1,7 @@
+Prerequisites:
+
+* For Linux OS, C-bindings and FTDI drivers must be installed following the steps in [this repo](https://github.com/openradarinitiative/openradar_mmwave_utils).
+
 `main.py` is the main script to run the GUI.
 
 `mmwaveconfig.txt` and `cf.json` needs to be placed where they are needed.
